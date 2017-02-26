@@ -18,7 +18,7 @@ struct GameParams {
   unsigned int cards;
   unsigned int games;
   bool quiet;
-  bool timeout;
+  bool ignore_timeout;
   bool override_names;
   std::vector<std::string> run_commands;
 
@@ -48,21 +48,24 @@ int main(int argc, char ** argv) {
     gameParams.games = gamesArg.getValue();
     unsigned int sets = setsArg.getValue();
     gameParams.quiet = quietSwitch.getValue();
-    gameParams.timeout = timeoutSwitch.getValue();
+    gameParams.ignore_timeout = timeoutSwitch.getValue();
     gameParams.override_names = overrideSwitch.getValue();
     gameParams.run_commands = runcmdArgs.getValue();
-
+    unsigned int numberOfPlayers = gameParams.run_commands.size();
+    // Some validation on the parsed arguments
+    if (sets > 0 && gameParams.games > 0) {
+      std::cout << "Only one of -games or -sets may be specified, but not both." << std::endl;
+            exit(1);
+    }
+    if (sets > 0 && gameParams.games < 0 ) {
+      gameParams.games = numberOfPlayers * sets;
+    }
     
+    // Initialize the game
     Networking networking;
-    
-    unsigned short mapWidth = 6;
-    unsigned short mapHeight = 6;
-    unsigned int seed = 0;
-    unsigned short n_players_for_map_creation = 2; //to rm
-
-    quiet_output = quietSwitch.getValue();
-    bool override_names = overrideSwitch.getValue();
-    bool ignore_timeout = timeoutSwitch.getValue();
+    //Create game. Null parameters will be ignored.
+    ChickenPoker chickenPoker = ChickenPoker(gameParams.cards, networking, gameParams.ignore_timeout);
+    GameState& gameState = chickenPoker;
 
 
     std::list<std::string> unlabeledArgs;
@@ -70,14 +73,8 @@ int main(int argc, char ** argv) {
         unlabeledArgs.push_back(*a);
     }
 
-    if(mapWidth == 0 && mapHeight == 0) {
-        std::vector<unsigned short> mapSizeChoices = {20, 25, 25, 30, 30, 30, 35, 35, 35, 35, 40, 40, 40, 45, 45, 50};
-        mapWidth = mapSizeChoices[rand() % mapSizeChoices.size()];
-        mapHeight = mapWidth;
-    }
-
     std::vector<std::string> names;
-    if(override_names) {
+    if(gameParams.override_names) {
         if(unlabeledArgs.size() < 4 || unlabeledArgs.size() % 2 != 0) {
             std::cout << "Invalid number of player parameters with override switch enabled.  Override intended for server use only." << std::endl;
             exit(1);
@@ -116,21 +113,20 @@ int main(int argc, char ** argv) {
         }
     }
 
-    unsigned int numberOfPlayers = networking.numberOfPlayers();
+    numberOfPlayers = networking.numberOfPlayers();
     
 
-    //Create game. Null parameters will be ignored.
-    Halite my_game = Halite(mapWidth, mapHeight, seed, n_players_for_map_creation, networking, ignore_timeout);
+
 
     std::string outputFilename = ".";
-    GameStatistics stats = my_game.runGame(&names, seed, id, true, outputFilename);
+    GameStatistics stats = gameState.run_game() ; //&names, 5, id, true, outputFilename);
 
     if(quiet_output) {
         std::cout << stats;
     }
     else {
         for(unsigned int a = 0; a < stats.player_statistics.size(); a++) {
-          std::cout << "Player #" << stats.player_statistics[a].tag << ", " << my_game.getName(stats.player_statistics[a].tag) << ", came in rank #" << stats.player_statistics[a].rank << " and was last alive on frame #" << stats.player_statistics[a].last_frame_alive << "!\n";
+          std::cout << "Player #" << stats.player_statistics[a].tag << ", " << stats.player_statistics[a].tag << ", came in rank #" << stats.player_statistics[a].rank << " and was last alive on frame #" << stats.player_statistics[a].last_frame_alive << "!\n";
         }
     }
 
