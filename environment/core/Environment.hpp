@@ -1,23 +1,26 @@
-#ifndef ENVIRONMENT_H
-#define ENVIRONMENT_H
+#pragma once
 
+#include "Agent.hpp"
+#include "State.hpp"
+#include "Action.hpp"
+#include "Reward.hpp"
 
 class Agent;
 class State;
 class Action;
-class Reward;
+
 
 /** The Environment connects and interacts with Agents. In each iteration It sends the State to the agents.
   It receives an Action from the agents and updates the State dependent on the given Actions.
   Finally it sends a Reward to the Agents.
 
   In an episode the Environment iterates until the termination condition is reached. */
-class Enviroment {
+class Environment {
 public:
-  virtual ~Enviroment();
+  virtual ~Environment();
   
   // default constructor  
-  virtual Enviroment(){std::};
+  Environment() = default;
 
   /** Disconnects all players. */
   virtual void connect_agents(std::vector<Agent> agents);
@@ -51,22 +54,20 @@ protected:
   virtual void step() {
     std::vector<Action> actions;
     for (Agent agent : agents) {
-      Action action = agent.send_state(state);
+      Action action = agent.receive_state(state);
       actions.push_back(action);
     }
     std::map<Agent, Reward> rewards = state.update(actions);
     for (Agent agent : agents) {
-      agent.send_reward(rewards[agent]);
+      Reward reward = rewards[agent];
+      agent.receive_reward(reward);
     }
   }
 
   /** Signals all Agents that the episode is finished. After this function returns a new episode may be started. */
   virtual void finalize_episode();
 
-  State state
-  std::vector<Agent> agents
+  State state;
+  std::vector<Agent> agents;
 };
 
-
-
-#endif
