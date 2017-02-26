@@ -60,7 +60,8 @@ int main(int argc, char ** argv) {
     if (sets > 0 && gameParams.games < 0 ) {
       gameParams.games = numberOfPlayers * sets;
     }
-    
+
+
     // Initialize the game
     Networking networking;
     //Create game. Null parameters will be ignored.
@@ -108,7 +109,7 @@ int main(int argc, char ** argv) {
             }
         }
         catch(...) {
-            std::cout << "One or more of your bot launch command strings failed.  Please check for correctness and try again." << std::endl;
+            std::cout << "One or more bot launch command strings failed.  Please check for correctness and try again." << std::endl;
             exit(1);
         }
     }
