@@ -9,20 +9,12 @@
 class Agent;
 //class Action;
 
-/** The state. */
+/** The interface for State. */
 class State {
 public:
-    virtual ~State();
-    
-    // default constructor  
-    State() = default;
+    virtual ~State(){};
 
-    virtual std::map<Agent, Reward> update(std::vector<Action>& actions) {
-        std::map<Agent, Reward> rewards;        
-        return rewards;
-    };
+    virtual std::map<Agent, Reward> update(std::vector<Action>& actions) = 0;
 
-    virtual bool termination_condition() {
-      return true;  
-    };
+    virtual bool termination_condition() = 0;
 };

@@ -14,7 +14,7 @@
 #include "json.hpp"
 #include "../networking/Networking.hpp"
 
-extern bool quiet_output = false;
+bool quiet_output = false;
 
 struct PlayerStatistics {
     int tag;

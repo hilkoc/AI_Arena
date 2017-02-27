@@ -2,11 +2,15 @@
 
 
 /** The action that agents send to the environment. */
-class Action {
-public:
-  virtual ~Action();
-  
-  // default constructor  
-  Action() = default;
+using Action = int;
 
-};
+/** For more interesting Actions a special type can be defined in this header file. */
+
+//class Action {
+//public:
+//  virtual ~Action();
+//  
+//  // default constructor  
+//  Action() = default;
+
+//};
