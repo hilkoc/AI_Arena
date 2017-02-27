@@ -68,9 +68,14 @@ int run_main(CmdParams& cmdParams) {
     for (std::string cmd : cmdParams.run_commands) {
          agents.push_back(Agent());
     }
+    std::vector<Agent*> agents_ptrs; // TODO better
+    for (Agent agent : agents) {
+         agents_ptrs.push_back(&agent);
+    }
+
     ChpFactory chpFactory = ChpFactory(cmdParams.cards);
     Environment environment(chpFactory);
-    environment.connect_agents(agents);
+    environment.connect_agents(agents_ptrs);
     environment.run_episodes(cmdParams.games);
 
 

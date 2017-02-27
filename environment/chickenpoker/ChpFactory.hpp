@@ -6,15 +6,18 @@
 
 class ChpFactory : public Factory {
 public:
-    virtual ~ChpFactory() = default;
-    ChpFactory() = default;
+    virtual ~ChpFactory() {
+        if (chpState != nullptr) {
+            delete chpState;
+        }
+    };
 
-    ChpFactory(unsigned int cards_in) : cards(cards_in) {};
+    ChpFactory(unsigned int cards_in) : chpState(nullptr), cards(cards_in) {};
 
     virtual State& createState() {
-        this->chpState = ChpState(cards);
-        return this->chpState;
-    }
+        chpState = new ChpState(cards);
+        return *(chpState);
+    };
 
 private:
     //prohibit allocation on the heap
@@ -23,6 +26,6 @@ private:
     // void   operator delete   (void *); //gives linking errors
     void   operator delete[] (void*);
 
-    ChpState chpState;
+    ChpState* chpState;
     unsigned int cards;
 };

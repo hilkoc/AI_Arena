@@ -9,7 +9,6 @@
 
 class Agent;
 class State;
-class Action;
 
 
 /** The Environment connects and interacts with Agents. In each iteration It sends the State to the agents.
@@ -24,7 +23,7 @@ public:
     Environment(Factory& factoryImpl): factory(factoryImpl){};
 
     /** Disconnects all players. */
-    virtual void connect_agents(std::vector<Agent> agents);
+    virtual void connect_agents(std::vector<Agent*> agents);
 
     /** Disconnects all players. Happens automatically when environment is destroyed. */
     virtual void disconnect_agents();
@@ -58,15 +57,15 @@ protected:
 
         std::cout << "Sending states, receiving actions" << std::endl;
         std::vector<Action> actions;
-        for (Agent agent : agents) {
-            Action action = agent.receive_state(*state);
+        for (Agent* agent : agents) {
+            Action action = agent->receive_state(*state);
             actions.push_back(action);
         }
-        std::map<Agent, Reward> rewards = state->update(actions);
+        std::map<Agent*, Reward> rewards = state->update(actions);
         std::cout << "Sending rewards" << std::endl;
-        for (Agent agent : agents) {
+        for (Agent* agent : agents) {
             Reward reward = rewards[agent];
-            agent.receive_reward(reward);
+            agent->receive_reward(reward);
         }
     }
 
@@ -75,6 +74,6 @@ protected:
 
     Factory& factory;
     State* state;
-    std::vector<Agent> agents;
+    std::vector<Agent*> agents;
 };
 

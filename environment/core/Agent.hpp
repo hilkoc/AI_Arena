@@ -6,8 +6,9 @@
 #include "State.hpp"
 #include "Reward.hpp"
 
-class Action;
+
 class State;
+class Action;
 
 /** The Agent. */
 class Agent {
@@ -15,7 +16,7 @@ public:
     virtual ~Agent();
 
     virtual Action receive_state(State& state) {
-        Action action;
+        Action action(*this, 1);
         return action;
     }
 

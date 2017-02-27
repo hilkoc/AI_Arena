@@ -1,16 +1,16 @@
 #pragma once
 
+//#include "Agent.hpp"
+class Agent;
 
 /** The action that agents send to the environment. */
-using Action = int;
+class Action {
+public:
+    virtual ~Action();
 
-/** For more interesting Actions a special type can be defined in this header file. */
+    Action(Agent& agent_in, unsigned int k_in) : agent(agent_in), k(k_in) {};
 
-//class Action {
-//public:
-//  virtual ~Action();
-//  
-//  // default constructor  
-//  Action() = default;
-
-//};
+private:
+    Agent& agent;  // The agent that is doing this action.
+    unsigned int k; // The card that is played.
+};
