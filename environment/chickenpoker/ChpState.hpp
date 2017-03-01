@@ -15,12 +15,27 @@ class ChpState : public State {
 public:
     virtual ~ChpState(){};
 
-    ChpState(unsigned int cards_in) : cards(cards_in), turns(cards_in) {};
+    ChpState(unsigned int bets_in) : bets(bets_in), rounds(bets_in) {};
 
     virtual std::map<Agent*, Reward> update(std::vector<Action>& actions) {
-        this->turns -= 1;
-        
+        this->rounds -= 1;
         std::map<Agent*, Reward> rewards;
+        unsigned int max_bet(0);
+        Agent* round_winner = nullptr;
+        unsigned int wins(0);
+        for (Action action : actions) {
+            Agent& agent = action.get_agent();
+            unsigned int bet = action.get_bet();
+            wins += bet;
+            player_bets[&agent][bet] = false;
+            if (bet > max_bet) {
+                max_bet = bet;
+                round_winner = &agent;            
+            }
+            rewards[&agent] = Reward(0);  // Default to 0.
+        }
+        
+        rewards[round_winner] = Reward(wins);  // Winner gets it all.
         return rewards;
     };
 
@@ -29,19 +44,30 @@ public:
     /** Some states need to know about the Agents that are interacting with it. */
     virtual bool add_agents(std::vector<Agent*>& agents){
         for (Agent* agent : agents) {
-            player_cards[agent] = std::vector<bool>(false, this->cards);
+            // For convience makethe vector size one bigger than needed. Ignore 0th index.
+            player_bets[agent] = std::vector<bool>(this->bets);
         }
     };
 
     /** Agents may leave (unexpectedly) at any time. */
     virtual bool remove_agent(Agent& agent) {
-        player_cards.erase(&agent);
+        player_bets.erase(&agent);
     };
 
-private:
-    unsigned int const cards;
-    unsigned int turns;
 
-    // player_cards[player][k] is true indicates that player is allowed to play action k.
-    std::map<Agent*, std::vector<bool> > player_cards;
+    virtual void reset(){
+        for (const auto &pair : player_bets) {
+            std::vector<bool> bets = pair.second;
+            std::fill(bets.begin(), bets.end(), true);
+        }
+};
+private:
+    /** The total number of rounds in the game, also the maximum bet. */
+    unsigned int const bets;
+
+    /** The number of rounds left in the game*/
+    unsigned int rounds;
+
+    /** player_bets[player][k] is true indicates that player is allowed to play action k. */
+    std::map<Agent*, std::vector<bool> > player_bets;
 };

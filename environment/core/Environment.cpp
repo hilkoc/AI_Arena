@@ -24,6 +24,7 @@
         this->state = &this->factory.createState();
         // The state needs to know the agents that interact with it.
         this->state->add_agents(this->agents);
+        this->state->reset();
     };
 
     /** Signals all Agents that the episode is finished. After this function returns a new episode may be started. */

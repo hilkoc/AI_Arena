@@ -8,24 +8,30 @@
 
 
 class State;
-class Action;
+//class Action;
 
 /** The Agent. */
 class Agent {
 public:
-    virtual ~Agent();
+    virtual ~Agent(){};
 
-    virtual Action receive_state(State& state) {
-        Action action(*this, 1);
-        return action;
-    }
+    Agent(unsigned int const agent_id) : id(agent_id) {};
 
-    virtual void receive_reward(Reward& reward);
+    /** React with an action to the observed state. */
+    virtual Action receive_state(State& state) {};
 
+    /** Reward for action made by last call to receive_state. */
+    virtual void receive_reward(Reward& reward){};
+
+    /** Compare Agents by their id. Required for use as map key. */
     bool operator<(Agent const& right) const {
-        return agent_id < right.agent_id; // (strcmp(m_or, right.m_or) < 0);
+        return id < right.id;
     }
+
+    unsigned int const get_id() const {
+        return id;
+    };
 
 private:
-    unsigned int agent_id;
+    unsigned int const id;
 };

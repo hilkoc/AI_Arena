@@ -23,4 +23,7 @@ public:
 
     /** Agents may leave (unexpectedly) at any time. */
     virtual bool remove_agent(Agent& agent) = 0;
+
+    /** Assumes all agents are already added. Prepares internal state to start a new episode. */
+    virtual void reset() = 0;
 };

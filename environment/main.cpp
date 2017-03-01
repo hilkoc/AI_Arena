@@ -1,17 +1,18 @@
 #include <iostream>
 #include <tclap/CmdLine.h>
-
-//#include <cctype>
-////#include <chrono>
-//#include <list>
-//#include <string.h>
-
 #include "chickenpoker/ChpFactory.hpp"
 #include "chickenpoker/ChpState.hpp"
+#include "chickenpoker/ChpAgent.hpp"
 #include "core/Environment.hpp"
 
-class Environment;
+#include "logging/log.h"
+//Log Config
+structlog LOGCFG;
 
+
+
+
+/** Type to hold parsed command line parameters */
 struct CmdParams {
   unsigned int cards;
   unsigned int games;
@@ -22,7 +23,9 @@ struct CmdParams {
 
 };
 
+/** Parses arguments given on the command line and returns an object of type CmdParams. */
 CmdParams parse_cmdline_args(int argc, char ** argv) {
+
     TCLAP::CmdLine cmd("Chicken Poker Game Environment", ' ', "0.0");
 
     TCLAP::SwitchArg overrideSwitch("o", "override", "Overrides player-sent names using cmd args [SERVER ONLY].", cmd, false);
@@ -61,16 +64,19 @@ CmdParams parse_cmdline_args(int argc, char ** argv) {
     return cmdParams;
 }
 
+/** Creates and runs the environment with the given parameters. */
 int run_main(CmdParams& cmdParams) {
 
     // Initialize the environment and create the agents.
-    std::vector<Agent> agents;
+    int agent_id(1);
+    std::vector<ChpAgent> agents;
     for (std::string cmd : cmdParams.run_commands) {
-         agents.push_back(Agent());
+        agents.push_back(ChpAgent(agent_id));
+        agent_id++;
     }
     std::vector<Agent*> agents_ptrs; // TODO better
-    for (Agent agent : agents) {
-         agents_ptrs.push_back(&agent);
+    for (ChpAgent agent : agents) {
+        agents_ptrs.push_back(&agent);
     }
 
     ChpFactory chpFactory = ChpFactory(cmdParams.cards);
@@ -89,6 +95,10 @@ int run_main(CmdParams& cmdParams) {
 
 
 int main(int argc, char ** argv) {
+    LOGCFG.headers = true;
+    //LOGCFG.level = DEBUG;
+    LOG(INFO) << "Main executed with " << (argc - 1) << " arguments";
+
     /** Parses the command line parameters, and runs the environment. */
     CmdParams cmdParams = parse_cmdline_args(argc, argv);
     return run_main(cmdParams);
