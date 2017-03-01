@@ -1,11 +1,11 @@
 #pragma once
 
-#include <iostream>
 #include "Agent.hpp"
 #include "Factory.hpp"
 #include "State.hpp"
 #include "Action.hpp"
 #include "Reward.hpp"
+#include "logging/log.h"
 
 class Agent;
 class State;
@@ -23,7 +23,7 @@ public:
     Environment(Factory& factoryImpl): factory(factoryImpl){};
 
     /** Disconnects all players. */
-    virtual void connect_agents(std::vector<Agent*> agents);
+    virtual void connect_agents(std::vector<Agent*>& agents);
 
     /** Disconnects all players. Happens automatically when environment is destroyed. */
     virtual void disconnect_agents();
@@ -33,7 +33,7 @@ public:
     Initializes a new episode. Runs iterations with connected players and evolves the game state until the termination condition is met.*/
     virtual void run_episodes(unsigned int nr =1) {
         for (int episode_nr = 1; episode_nr <= nr; ++episode_nr) {
-            std::cout << "Starting episode " << episode_nr << std::endl;
+            LOG(DEBUG) << "Starting episode " << episode_nr;
 
             this->initialize_episode();
             while (!state->termination_condition()) {
@@ -54,15 +54,16 @@ protected:
 
     /** Runs one iteration for the current episode */
     virtual void step() {
-
-        std::cout << "Sending states, receiving actions" << std::endl;
         std::vector<Action> actions;
-        for (Agent* agent : agents) {
-            Action action = agent->receive_state(*state);
+        LOG(DEBUG) << "Sending states, receiving actions ";
+        for (Agent* agent : this->agents) {
+            LOG(DEBUG) << "  Sending state to agent " << agent->get_id();
+            Action action = agent->receive_state(state->subtype());
+            LOG(DEBUG) << "  actions.push_back(action);";
             actions.push_back(action);
         }
         std::map<Agent*, Reward> rewards = state->update(actions);
-        std::cout << "Sending rewards" << std::endl;
+        LOG(DEBUG) << "Sending rewards";
         for (Agent* agent : agents) {
             Reward reward = rewards[agent];
             agent->receive_reward(reward);

@@ -3,11 +3,10 @@
 #include <vector>
 #include <map>
 #include "core/State.hpp"
-//#include "core/Agent.hpp"
+#include "core/Agent.hpp"
 #include "core/Action.hpp"
 #include "core/Reward.hpp"
 
-class Agent;
 class Action;
 
 /** The state. */
@@ -17,37 +16,12 @@ public:
 
     ChpState(unsigned int bets_in) : bets(bets_in), rounds(bets_in) {};
 
-    virtual std::map<Agent*, Reward> update(std::vector<Action>& actions) {
-        this->rounds -= 1;
-        std::map<Agent*, Reward> rewards;
-        unsigned int max_bet(0);
-        Agent* round_winner = nullptr;
-        unsigned int wins(0);
-        for (Action action : actions) {
-            Agent& agent = action.get_agent();
-            unsigned int bet = action.get_bet();
-            wins += bet;
-            player_bets[&agent][bet] = false;
-            if (bet > max_bet) {
-                max_bet = bet;
-                round_winner = &agent;            
-            }
-            rewards[&agent] = Reward(0);  // Default to 0.
-        }
-        
-        rewards[round_winner] = Reward(wins);  // Winner gets it all.
-        return rewards;
-    };
+    virtual std::map<Agent*, Reward> update(std::vector<Action>& actions);
 
     virtual bool termination_condition();
 
     /** Some states need to know about the Agents that are interacting with it. */
-    virtual bool add_agents(std::vector<Agent*>& agents){
-        for (Agent* agent : agents) {
-            // For convience makethe vector size one bigger than needed. Ignore 0th index.
-            player_bets[agent] = std::vector<bool>(this->bets);
-        }
-    };
+    virtual bool add_agents(std::vector<Agent*>& agents);
 
     /** Agents may leave (unexpectedly) at any time. */
     virtual bool remove_agent(Agent& agent) {
@@ -60,7 +34,16 @@ public:
             std::vector<bool> bets = pair.second;
             std::fill(bets.begin(), bets.end(), true);
         }
-};
+    };
+
+    void log_summary() {
+        LOG(INFO) << "Nr agents " << player_bets.size() << " rounds: " << rounds;
+    };
+
+    virtual ChpState* subtype() {
+        return this;    
+    };
+
 private:
     /** The total number of rounds in the game, also the maximum bet. */
     unsigned int const bets;

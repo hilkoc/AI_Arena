@@ -1,5 +1,6 @@
 #pragma once
 
+#include "logging/log.h"
 #include <vector>
 #include <map>
 //#include "Agent.hpp"
@@ -26,4 +27,7 @@ public:
 
     /** Assumes all agents are already added. Prepares internal state to start a new episode. */
     virtual void reset() = 0;
+
+    /** Returns this */
+    virtual State* subtype() = 0;
 };

@@ -1,16 +1,14 @@
 #include <iostream>
-#include <tclap/CmdLine.h>
-#include "chickenpoker/ChpFactory.hpp"
-#include "chickenpoker/ChpState.hpp"
-#include "chickenpoker/ChpAgent.hpp"
-#include "core/Environment.hpp"
 
 #include "logging/log.h"
 //Log Config
 structlog LOGCFG;
 
-
-
+#include <tclap/CmdLine.h>
+#include "chickenpoker/ChpFactory.hpp"
+#include "chickenpoker/ChpState.hpp"
+#include "chickenpoker/ChpAgent.hpp"
+#include "core/Environment.hpp"
 
 /** Type to hold parsed command line parameters */
 struct CmdParams {
@@ -68,14 +66,16 @@ CmdParams parse_cmdline_args(int argc, char ** argv) {
 int run_main(CmdParams& cmdParams) {
 
     // Initialize the environment and create the agents.
-    int agent_id(1);
+    unsigned int agent_id(1);
     std::vector<ChpAgent> agents;
     for (std::string cmd : cmdParams.run_commands) {
-        agents.push_back(ChpAgent(agent_id));
+        ChpAgent chpAgent(agent_id);
+        LOG(DEBUG) << "Creating agent " << chpAgent.get_id();
+        agents.push_back(chpAgent);
         agent_id++;
     }
-    std::vector<Agent*> agents_ptrs; // TODO better
-    for (ChpAgent agent : agents) {
+    std::vector<Agent*> agents_ptrs; // Convert to pointers
+    for (ChpAgent& agent : agents) {
         agents_ptrs.push_back(&agent);
     }
 
@@ -96,7 +96,7 @@ int run_main(CmdParams& cmdParams) {
 
 int main(int argc, char ** argv) {
     LOGCFG.headers = true;
-    //LOGCFG.level = DEBUG;
+    LOGCFG.level = DEBUG;
     LOG(INFO) << "Main executed with " << (argc - 1) << " arguments";
 
     /** Parses the command line parameters, and runs the environment. */
