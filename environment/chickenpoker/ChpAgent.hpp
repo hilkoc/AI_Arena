@@ -27,9 +27,9 @@ public:
         return this->do_receive_state(state);
     };
 
-    virtual Action do_receive_state(ChpState* state) {
+    virtual Action do_receive_state(State* state) {
         LOG(DEBUG) << "<ChpState*> receive_state. Agent " << this->get_id() << "received ";
-        state->log_summary();
+        //state->log_summary();
         Action action(*this, this->next_bet);
         next_bet += 1;
         return action;
