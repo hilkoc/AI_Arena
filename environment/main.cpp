@@ -93,77 +93,15 @@ int run_main(CmdParams& cmdParams) {
     return 0;
 }
 
-void test();
+
 
 int main(int argc, char ** argv) {
     LOGCFG.headers = true;
     LOGCFG.level = DEBUG;
-    LOG(INFO) << "Main executed with " << (argc - 1) << " arguments";
+    LOG(INFO) << "Starting Chicken Poker";
 
-    test();
     /** Parses the command line parameters, and runs the environment. */
     CmdParams cmdParams = parse_cmdline_args(argc, argv);
     return run_main(cmdParams);
 }
-
-
-class Observation { // Value type
-private:
-    int k = int(3);
-};
-
-class Stat; //forward declare
-class Agen {
-public:
-    virtual void receive(Stat& stat) = 0;
-};
-
-
-class Agen; //forward declare
-class Stat {  //Color
-public:
-    virtual void send_to(Agen& agen) = 0;
-};
-
-    
-class SubStat : public Stat {
-public:
-    virtual void send_to(Agen& agen) {
-        LOG(INFO) << "Sending State.";
-        agen.receive(*this);
-    };
-};
-
-
-class SubAgen : public Agen { // CountVisitor
-public:
-    virtual void receive(Stat& stat) {
-        LOG(INFO) << "SubAgen receiving Stat&";
-        SubStat& substat = static_cast<SubStat&>(stat);
-        finally_receive(substat);
-    };
-
-    void finally_receive(SubStat& stat) {
-        LOG(INFO) << "OK! SubAgen receiving SubStat&";
-    };
-};
-
-
-
-void test(){
-    SubStat substat;
-    SubAgen subagen;
-
-    Stat& stat = substat;
-    Agen& agen = subagen;
-
-    // Send the state to the agent.
-
-//    subagen.receive(substat); // OK
-//    agen.receive(stat);
-    stat.send_to(agen);
-//    substat.send_to(agen);
-    LOG(INFO) << "\n\n\n";
-}
-
 

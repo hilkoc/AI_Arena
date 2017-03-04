@@ -15,6 +15,7 @@ std::map<Agent*, Reward> ChpState::update(std::vector<Action>& actions) {
     for (Action action : actions) {
         Agent& agent = action.get_agent();
         unsigned int bet = action.get_bet();
+        LOG(DEBUG) << "    Agent " << agent.get_id() << ": " << bet;
         wins += bet;
         player_bets[&agent][bet] = false;
         if (bet > max_bet) {

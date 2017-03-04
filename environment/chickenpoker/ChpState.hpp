@@ -7,7 +7,18 @@
 #include "core/Action.hpp"
 #include "core/Reward.hpp"
 
-class Action;
+
+/** The information that an agent receives at the start of an episode. */
+class InitialState {
+public:
+    InitialState(unsigned int const player_id_in, unsigned int const bets_in)
+    : player_id(player_id_in), bets(bets_in) {};
+    // The player id for breaking ties.
+    unsigned int const player_id;
+    unsigned int const bets;
+};
+
+//class Action; //
 
 /** The state. */
 class ChpState : public State {
@@ -33,6 +44,9 @@ public:
         for (const auto &pair : player_bets) {
             std::vector<bool> bets = pair.second;
             std::fill(bets.begin(), bets.end(), true);
+            Agent* agent = pair.first;
+            InitialState initialState(agent->get_id(), this->bets);
+            agent->initialize_episode(initialState);
         }
     };
 
@@ -54,3 +68,4 @@ private:
     /** player_bets[player][k] is true indicates that player is allowed to play action k. */
     std::map<Agent*, std::vector<bool> > player_bets;
 };
+

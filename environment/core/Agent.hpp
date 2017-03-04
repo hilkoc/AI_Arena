@@ -7,7 +7,7 @@
 #include "Reward.hpp"
 #include "logging/log.h"
 
-class State;
+class InitialState;
 //class Action;
 
 /** The Agent. */
@@ -16,6 +16,9 @@ public:
     virtual ~Agent(){};
 
     Agent(unsigned int const agent_id) : id(agent_id) {};
+
+    /** Receive the initial state for this episode. */
+    virtual void initialize_episode(InitialState& initial_state) = 0;
 
     /** React with an action to the observed state. */
     virtual Action receive_state(State& state) = 0;

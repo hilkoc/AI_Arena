@@ -15,6 +15,10 @@ public:
     ChpFactory(unsigned int bets_in) : chpState(nullptr), bets(bets_in) {};
 
     virtual State& createState() {
+        // Only hold one state at a time, so delete previous if any.
+        if (chpState != nullptr) {
+            delete chpState;
+        }
         chpState = new ChpState(bets);
         return *(chpState);
     };

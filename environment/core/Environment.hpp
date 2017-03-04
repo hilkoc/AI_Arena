@@ -22,15 +22,15 @@ public:
  
     Environment(Factory& factoryImpl): factory(factoryImpl){};
 
-    /** Disconnects all players. */
+    /** Initializes a session for multiple episodes. Connects all agents. */
     virtual void connect_agents(std::vector<Agent*>& agents);
 
-    /** Disconnects all players. Happens automatically when environment is destroyed. */
+    /** Disconnects all agents. Happens automatically when environment is destroyed. */
     virtual void disconnect_agents();
 
 
     /** Assumes all Agents are connected.
-    Initializes a new episode. Runs iterations with connected players and evolves the game state until the termination condition is met.*/
+    Initializes a new episode. Runs iterations with connected agents and evolves the game state until the termination condition is met.*/
     virtual void run_episodes(unsigned int nr =1) {
         for (int episode_nr = 1; episode_nr <= nr; ++episode_nr) {
             LOG(DEBUG) << "Starting episode " << episode_nr;
@@ -59,11 +59,11 @@ protected:
         for (Agent* agent : this->agents) {
             LOG(DEBUG) << "  Sending state to agent " << agent->get_id();
             Action action = state->send_to(*agent);
-            LOG(DEBUG) << "  actions.push_back(action);";
             actions.push_back(action);
         }
+        LOG(DEBUG) << "state-update,  calculating rewards";
         std::map<Agent*, Reward> rewards = state->update(actions);
-        LOG(DEBUG) << "Sending rewards";
+        LOG(DEBUG) << "Sending rewards";  
         for (Agent* agent : agents) {
             Reward reward = rewards[agent];
             agent->receive_reward(reward);

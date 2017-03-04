@@ -9,7 +9,7 @@
 
 #include "logging/log.h"
 
-class State;
+//class State;
 //class Action;
 
 /** The Agent. */
@@ -22,8 +22,14 @@ public:
         LOG(DEBUG) << "My id is" << this->get_id();
     };
 
+    void initialize_episode(InitialState& initial_state) {
+        //InitialState& initial_state = static_cast<InitialState&>(initial_state);
+        player_id = initial_state.player_id;
+        bets = initial_state.bets;
+        LOG(DEBUG) << "   Agent " << this->get_id() << " episode initialized";
+    };
+
     virtual Action receive_state(State& state) {
-        LOG(DEBUG) << " delegating <receive_state>";
         // Have to cast state down to its know subtype, otherwise the subtypes of State
         // will have to appear in the top level inerface of Agent.
         ChpState& chpState = static_cast<ChpState&>(state);
@@ -44,6 +50,10 @@ public:
 
 
 private:
-
+    // Changes per round
     unsigned int next_bet;
+
+    // These are set per episode
+    unsigned int player_id;
+    unsigned int bets;
 };
