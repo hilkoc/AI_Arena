@@ -12,20 +12,23 @@ public:
         }
     };
 
-    ChpFactory(unsigned int cards_in) : chpState(nullptr), cards(cards_in) {};
+    ChpFactory(unsigned int bets_in) : chpState(nullptr), bets(bets_in) {};
 
     virtual State& createState() {
-        chpState = new ChpState(cards);
+        chpState = new ChpState(bets);
         return *(chpState);
     };
 
-private:
     //prohibit allocation on the heap
-    void * operator new   (size_t);
-    void * operator new[] (size_t);
-    // void   operator delete   (void *); //gives linking errors
-    void   operator delete[] (void*);
-
+    void * operator new   (size_t) = delete;
+    void * operator new[] (size_t) = delete;
+    //void   operator delete   (void *) = delete; //Don't delete delete
+    void   operator delete[] (void*) = delete;
+    
+    // prohibit copying
+    ChpFactory(ChpFactory& o) = delete;
+    ChpFactory& operator= (ChpFactory& o) = delete;
+private:
     ChpState* chpState;
-    unsigned int cards;
+    unsigned int bets;
 };

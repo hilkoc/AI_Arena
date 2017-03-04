@@ -12,7 +12,7 @@ structlog LOGCFG;
 
 /** Type to hold parsed command line parameters */
 struct CmdParams {
-  unsigned int cards;
+  unsigned int bets;
   unsigned int games;
   bool quiet;
   bool ignore_timeout;
@@ -32,14 +32,14 @@ CmdParams parse_cmdline_args(int argc, char ** argv) {
 
     TCLAP::ValueArg<unsigned int> setsArg("s", "sets", "A set consists of p games where p is the number of players. Run g = s*p number of games.", false, 0, "number", cmd);   
     TCLAP::ValueArg<unsigned int> gamesArg("g", "games", "Run g number of games. Player ids are rotated after every game.", false, 1, "number", cmd);   
-    TCLAP::ValueArg<unsigned int> cardsArg("n", "cards", "The number of cards each player is dealt. This is also the value of the highest card.", true, 10, "number", cmd);   
+    TCLAP::ValueArg<unsigned int> betsArg("n", "bets", "The number of rounds in the game. This is also the value of the highest bet.", true, 10, "number", cmd);   
     //rm TCLAP::ValueArg<std::string> replayDirectoryArg("i", "replaydirectory", "The path to directory for replay output.", false, ".", "path to directory", cmd);
     TCLAP::UnlabeledMultiArg<std::string> runcmdArgs("NonspecifiedArgs", "Run commands for bots.", false, "cmds in double quotes", cmd);
 
     cmd.parse(argc, argv);
 
     CmdParams cmdParams;
-    cmdParams.cards = cardsArg.getValue();
+    cmdParams.bets = betsArg.getValue();
     cmdParams.games = gamesArg.getValue();
     unsigned int sets = setsArg.getValue();
     cmdParams.quiet = quietSwitch.getValue();
@@ -79,7 +79,7 @@ int run_main(CmdParams& cmdParams) {
         agents_ptrs.push_back(&agent);
     }
 
-    ChpFactory chpFactory = ChpFactory(cmdParams.cards);
+    ChpFactory chpFactory(cmdParams.bets);
     Environment environment(chpFactory);
     environment.connect_agents(agents_ptrs);
     environment.run_episodes(cmdParams.games);
@@ -88,7 +88,7 @@ int run_main(CmdParams& cmdParams) {
     //State& state = chpFactory.createState();
 //    Networking networking;
 //    //Create game. Null parameters will be ignored.
-//    ChickenPoker chickenPoker = ChickenPoker(cmdParams.cards, networking, cmdParams.ignore_timeout);
+//    ChickenPoker chickenPoker = ChickenPoker(cmdParams.bets, networking, cmdParams.ignore_timeout);
 //    GameState& gameState = chickenPoker;
     return 0;
 }
@@ -107,7 +107,10 @@ int main(int argc, char ** argv) {
 }
 
 
-
+class Observation { // Value type
+private:
+    int k = int(3);
+};
 
 class Stat; //forward declare
 class Agen {
@@ -122,7 +125,7 @@ public:
     virtual void send_to(Agen& agen) = 0;
 };
 
-
+    
 class SubStat : public Stat {
 public:
     virtual void send_to(Agen& agen) {
