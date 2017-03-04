@@ -123,26 +123,25 @@ public:
 };
 
 
-class SubStat;
-class SubAgen : public Agen { // CountVisitor
-public:
-    virtual void receive(Stat& stat) {
-        LOG(INFO) << "SubAgen receiving Stat&";
-        stat.send_to(*this);
-    };
-
-    void finally_receive(SubStat& stat) {
-        LOG(INFO) << "OK! SubAgen receiving SubStat&";
-    };
-};
-
-
 class SubStat : public Stat {
 public:
     virtual void send_to(Agen& agen) {
         LOG(INFO) << "Sending State.";
-        SubAgen& subagen = static_cast<SubAgen&>(agen);
-        subagen.finally_receive(*this);
+        agen.receive(*this);
+    };
+};
+
+
+class SubAgen : public Agen { // CountVisitor
+public:
+    virtual void receive(Stat& stat) {
+        LOG(INFO) << "SubAgen receiving Stat&";
+        SubStat& substat = static_cast<SubStat&>(stat);
+        finally_receive(substat);
+    };
+
+    void finally_receive(SubStat& stat) {
+        LOG(INFO) << "OK! SubAgen receiving SubStat&";
     };
 };
 
@@ -158,8 +157,8 @@ void test(){
     // Send the state to the agent.
 
 //    subagen.receive(substat); // OK
-    agen.receive(stat);
-//    stat.send_to(agen);
+//    agen.receive(stat);
+    stat.send_to(agen);
 //    substat.send_to(agen);
     LOG(INFO) << "\n\n\n";
 }
