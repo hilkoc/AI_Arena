@@ -29,5 +29,5 @@ public:
     virtual void reset() = 0;
 
     /** Returns this */
-    virtual State* subtype() = 0;
+    virtual Action send_to(Agent& agent) = 0;
 };

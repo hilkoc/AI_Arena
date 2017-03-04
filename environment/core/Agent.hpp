@@ -18,7 +18,7 @@ public:
     Agent(unsigned int const agent_id) : id(agent_id) {};
 
     /** React with an action to the observed state. */
-    virtual Action receive_state(State* state) = 0;
+    virtual Action receive_state(State& state) = 0;
 
     /** Reward for action made by last call to receive_state. */
     virtual void receive_reward(Reward& reward){};

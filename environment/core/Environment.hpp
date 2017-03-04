@@ -58,7 +58,7 @@ protected:
         LOG(DEBUG) << "Sending states, receiving actions ";
         for (Agent* agent : this->agents) {
             LOG(DEBUG) << "  Sending state to agent " << agent->get_id();
-            Action action = agent->receive_state(state->subtype());
+            Action action = state->send_to(*agent);
             LOG(DEBUG) << "  actions.push_back(action);";
             actions.push_back(action);
         }

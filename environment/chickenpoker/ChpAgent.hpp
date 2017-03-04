@@ -22,12 +22,15 @@ public:
         LOG(DEBUG) << "My id is" << this->get_id();
     };
 
-    virtual Action receive_state(State* state) {
+    virtual Action receive_state(State& state) {
         LOG(DEBUG) << " delegating <receive_state>";
-        return this->do_receive_state(state);
+        // Have to cast state down to its know subtype, otherwise the subtypes of State
+        // will have to appear in the top level inerface of Agent.
+        ChpState& chpState = static_cast<ChpState&>(state);
+        return this->do_receive_state(chpState);
     };
 
-    virtual Action do_receive_state(State* state) {
+    virtual Action do_receive_state(ChpState& chpState) {
         LOG(DEBUG) << "<ChpState*> receive_state. Agent " << this->get_id() << "received ";
         //state->log_summary();
         Action action(*this, this->next_bet);

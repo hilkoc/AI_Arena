@@ -40,8 +40,8 @@ public:
         LOG(INFO) << "Nr agents " << player_bets.size() << " rounds: " << rounds;
     };
 
-    virtual ChpState* subtype() {
-        return this;    
+    virtual Action send_to(Agent& agent) {
+        return agent.receive_state(*this);;    
     };
 
 private:
