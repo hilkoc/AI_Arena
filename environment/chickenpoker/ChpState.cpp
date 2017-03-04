@@ -15,7 +15,7 @@ std::map<Agent*, Reward> ChpState::update(std::vector<Action>& actions) {
     for (Action action : actions) {
         Agent& agent = action.get_agent();
         unsigned int bet = action.get_bet();
-        LOG(DEBUG) << "    Agent " << agent.get_id() << ": " << bet;
+        LOG(INFO) << "    Agent " << agent.get_id() << ": " << bet;
         wins += bet;
         player_bets[&agent][bet] = false;
         if (bet > max_bet) {
@@ -34,7 +34,6 @@ std::map<Agent*, Reward> ChpState::update(std::vector<Action>& actions) {
 /** Some states need to know about the Agents that are interacting with it. */
 bool ChpState::add_agents(std::vector<Agent*>& agents){
     for (Agent* agent : agents) {
-        LOG(INFO) << "Adding agent " << agent->get_id();
         // For convience makethe vector size one bigger than needed. Ignore 0th index.
         player_bets[agent] = std::vector<bool>(this->bets);
     }

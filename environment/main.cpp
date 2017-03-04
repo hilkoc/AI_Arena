@@ -93,7 +93,11 @@ Agent* parse_run_cmd(std::string const& cmd, unsigned int const agent_id, ChpFac
             std::string start_s = cmd_parts[2];
             int step = std::stoi(step_s);
             int start = std::stoi(start_s);
-            LOG(INFO) << "Parsed linear " << step << " " << start;
+            if (start < 1) {
+                LOG(WARN) << "Second parameter <start> must be > 1 for linear. Given " << start;
+                exit(1);
+            }
+            return chpFactory.createLinearAgent(agent_id, step, start);
         } else {
             LOG(ERROR) << "linear takes exactly two params <step> and <start>."
              << " For example: " << "\"linear 3 2\". " << "Given " << cmd_parts.size() - 1;
@@ -121,9 +125,9 @@ int run_main(CmdParams& cmdParams) {
         agent_id++;
     }
 
-//    Environment environment(chpFactory);
-//    environment.connect_agents(agents);
-//    environment.run_episodes(cmdParams.games);
+    Environment environment(chpFactory);
+    environment.connect_agents(agents);
+    environment.run_episodes(cmdParams.games);
 
     return 0;
 }
@@ -131,9 +135,12 @@ int run_main(CmdParams& cmdParams) {
 
 
 int main(int argc, char ** argv) {
-    LOGCFG.headers = true;
-    LOGCFG.level = DEBUG;
+    LOGCFG.headers = false;
+    LOGCFG.level = INFO;
     LOG(INFO) << "Starting Chicken Poker";
+
+    // Initializing an unsigned with a negative nr gives garbage.
+//    int k = -7;    unsigned int l = k;  LOG(INFO) << "k " << k << " l " << l;
 
     /** Parses the command line parameters, and runs the environment. */
     CmdParams cmdParams = parse_cmdline_args(argc, argv);
