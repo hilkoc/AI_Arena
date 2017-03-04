@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include "logging/log.h"
 //Log Config
 structlog LOGCFG;
@@ -9,6 +7,14 @@ structlog LOGCFG;
 #include "chickenpoker/ChpState.hpp"
 #include "chickenpoker/ChpAgent.hpp"
 #include "core/Environment.hpp"
+
+#include <iostream>
+
+#include <string>
+#include <sstream>
+#include <vector>
+#include <iterator>
+
 
 /** Type to hold parsed command line parameters */
 struct CmdParams {
@@ -62,34 +68,63 @@ CmdParams parse_cmdline_args(int argc, char ** argv) {
     return cmdParams;
 }
 
+
+template<typename Out>
+void split(std::string const& s, char delim, Out result) {
+    std::stringstream ss;
+    ss.str(s);
+    std::string item;
+    while (std::getline(ss, item, delim)) {
+        *(result++) = item;
+    }
+}
+
+std::vector<std::string> split(std::string const& s, char delim) {
+    std::vector<std::string> elems;
+    split(s, delim, std::back_inserter(elems));
+    return elems;
+}
+
+Agent* parse_run_cmd(std::string const& cmd, unsigned int const agent_id, ChpFactory& chpFactory) {
+    std::vector<std::string> cmd_parts = split(cmd, ' ');
+    if ("linear" == cmd_parts[0]) {
+        if (3 == cmd_parts.size()) {
+            std::string step_s = cmd_parts[1];
+            std::string start_s = cmd_parts[2];
+            int step = std::stoi(step_s);
+            int start = std::stoi(start_s);
+            LOG(INFO) << "Parsed linear " << step << " " << start;
+        } else {
+            LOG(ERROR) << "linear takes exactly two params <step> and <start>."
+             << " For example: " << "\"linear 3 2\". " << "Given " << cmd_parts.size() - 1;
+            for (std::string& part : cmd_parts) { LOG(ERROR) << part; }
+            exit(1);
+        }
+    }
+
+    Agent* a = chpFactory.createAgent(agent_id);
+    return a;
+};
+
 /** Creates and runs the environment with the given parameters. */
 int run_main(CmdParams& cmdParams) {
 
     // Initialize the environment and create the agents.
     unsigned int agent_id(1);
-    std::vector<ChpAgent> agents;
-    for (std::string cmd : cmdParams.run_commands) {
-        ChpAgent chpAgent(agent_id);
-        LOG(DEBUG) << "Creating agent " << chpAgent.get_id();
-        agents.push_back(chpAgent);
+    ChpFactory chpFactory(cmdParams.bets);
+    std::vector<Agent*> agents;
+
+    for (std::string const & cmd : cmdParams.run_commands) {
+        Agent* a = parse_run_cmd(cmd, agent_id, chpFactory);
+        LOG(DEBUG) << "Created agent " << a->get_id();
+        agents.push_back(a);
         agent_id++;
     }
-    std::vector<Agent*> agents_ptrs; // Convert to pointers
-    for (ChpAgent& agent : agents) {
-        agents_ptrs.push_back(&agent);
-    }
 
-    ChpFactory chpFactory(cmdParams.bets);
-    Environment environment(chpFactory);
-    environment.connect_agents(agents_ptrs);
-    environment.run_episodes(cmdParams.games);
+//    Environment environment(chpFactory);
+//    environment.connect_agents(agents);
+//    environment.run_episodes(cmdParams.games);
 
-
-    //State& state = chpFactory.createState();
-//    Networking networking;
-//    //Create game. Null parameters will be ignored.
-//    ChickenPoker chickenPoker = ChickenPoker(cmdParams.bets, networking, cmdParams.ignore_timeout);
-//    GameState& gameState = chickenPoker;
     return 0;
 }
 

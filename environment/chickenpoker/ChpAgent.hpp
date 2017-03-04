@@ -15,11 +15,13 @@
 /** The Agent. */
 class ChpAgent : public Agent {
 public:
-    virtual ~ChpAgent(){};
+    virtual ~ChpAgent(){
+        LOG(DEBUG)  << "Destroying agent " << this->get_id();
+    };
 
     ChpAgent(unsigned int const agent_id) : Agent(agent_id) {
         next_bet = 1;
-        LOG(DEBUG) << "My id is" << this->get_id();
+        LOG(DEBUG) << "Creating agent " << this->get_id();
     };
 
     void initialize_episode(InitialState& initial_state) {
@@ -37,7 +39,6 @@ public:
     };
 
     virtual Action do_receive_state(ChpState& chpState) {
-        LOG(DEBUG) << "<ChpState*> receive_state. Agent " << this->get_id() << "received ";
         //state->log_summary();
         Action action(*this, this->next_bet);
         next_bet += 1;

@@ -7,9 +7,6 @@
 #include "Reward.hpp"
 #include "logging/log.h"
 
-class Agent;
-class State;
-
 
 /** The Environment connects and interacts with Agents. In each iteration It sends the State to the agents.
   It receives an Action from the agents and updates the State dependent on the given Actions.
