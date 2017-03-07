@@ -16,11 +16,22 @@ std::map<Agent*, Reward> ChpState::update(std::vector<Action>& actions) {
         Agent& agent = action.get_agent();
         unsigned int bet = action.get_bet();
         LOG(INFO) << "    Agent " << agent.get_id() << ": " << bet;
-        wins += bet;
-        player_bets[&agent][bet] = false;
-        if (bet > max_bet) {
-            max_bet = bet;
-            round_winner = &agent;            
+        LOG(DEBUG) <<  "valid move? " << player_bets[&agent][bet]  <<  " true = " << true << " eq " << ( player_bets[&agent][bet] == true);
+        if (player_bets[&agent][bet]) {
+            player_bets[&agent][bet] = false;
+            wins += bet;
+            if (bet == max_bet) {
+                LOG(INFO) << " A Tie needs to be broken.";
+            } else { 
+                if (bet > max_bet) {
+                    max_bet = bet;
+                    round_winner = &agent;
+                }
+            }
+        } else {
+            LOG(WARN) << "    INVALID ACTION Agent " << agent.get_id() << ": " << bet
+            << ". Dropping Agent.";
+            this->remove_agent(agent);
         }
         rewards[&agent] = Reward(0);  // Default to 0.
     }
@@ -35,7 +46,8 @@ std::map<Agent*, Reward> ChpState::update(std::vector<Action>& actions) {
 bool ChpState::add_agents(std::vector<Agent*>& agents){
     for (Agent* agent : agents) {
         // For convience makethe vector size one bigger than needed. Ignore 0th index.
-        player_bets[agent] = std::vector<bool>(this->bets);
+        player_bets[agent] = std::vector<bool>(1 + this->bets);
     }
-        LOG(DEBUG) << "Total agents " << player_bets.size();
+    LOG(DEBUG) << "Total agents " << player_bets.size();
 };
+

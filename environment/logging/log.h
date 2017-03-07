@@ -14,6 +14,7 @@
 enum typelog {
     DEBUG,
     INFO,
+    QUIET,
     WARN,
     ERROR
 };

@@ -8,7 +8,7 @@ structlog LOGCFG;
 #include "chickenpoker/ChpAgent.hpp"
 #include "core/Environment.hpp"
 
-#include <iostream>
+//#include <iostream>
 
 #include <string>
 #include <sstream>
@@ -57,14 +57,14 @@ CmdParams parse_cmdline_args(int argc, char ** argv) {
 
     // Some validation on the parsed arguments
     if (sets > 0 && cmdParams.games > 1) {
-      std::cout << "Only one of -games or -sets may be specified, but not both." << std::endl;
+      LOG(ERROR) << "Only one of -games or -sets may be specified, but not both.";
             exit(1);
     }
     if (sets > 0 && cmdParams.games == 1) {
       cmdParams.games = numberOfPlayers * sets;
     }
 
-    std::cout << "set, games, nr players is " << sets << ", " << cmdParams.games << ", "<< numberOfPlayers << std::endl;
+    LOG(DEBUG) << "set, games, nr players is " << sets << ", " << cmdParams.games << ", "<< numberOfPlayers;
     return cmdParams;
 }
 
@@ -89,17 +89,17 @@ Agent* parse_run_cmd(std::string const& cmd, unsigned int const agent_id, ChpFac
     std::vector<std::string> cmd_parts = split(cmd, ' ');
     if ("linear" == cmd_parts[0]) {
         if (3 == cmd_parts.size()) {
-            std::string step_s = cmd_parts[1];
-            std::string start_s = cmd_parts[2];
-            int step = std::stoi(step_s);
+            std::string start_s = cmd_parts[1];
+            std::string step_s = cmd_parts[2];
             int start = std::stoi(start_s);
+            int step = std::stoi(step_s);
             if (start < 1) {
-                LOG(WARN) << "Second parameter <start> must be > 1 for linear. Given " << start;
+                LOG(WARN) << "First parameter <start> must be > 1 for linear. Given " << start;
                 exit(1);
             }
             return chpFactory.createLinearAgent(agent_id, step, start);
         } else {
-            LOG(ERROR) << "linear takes exactly two params <step> and <start>."
+            LOG(ERROR) << "linear takes exactly two params <start> and <step>."
              << " For example: " << "\"linear 3 2\". " << "Given " << cmd_parts.size() - 1;
             for (std::string& part : cmd_parts) { LOG(ERROR) << part; }
             exit(1);

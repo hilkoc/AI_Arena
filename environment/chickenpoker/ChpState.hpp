@@ -41,17 +41,15 @@ public:
 
 
     virtual void reset(){
-        for (const auto &pair : player_bets) {
-            std::vector<bool> bets = pair.second;
+        rounds = bets;
+        for (auto& pair : player_bets) {
+            std::vector<bool>& bets = pair.second;
             std::fill(bets.begin(), bets.end(), true);
             Agent* agent = pair.first;
             InitialState initialState(agent->get_id(), this->bets);
             agent->initialize_episode(initialState);
         }
-    };
-
-    void log_summary() {
-        LOG(INFO) << "Nr agents " << player_bets.size() << " rounds: " << rounds;
+        // TODO reconnect dropped agents.
     };
 
     virtual Action send_to(Agent& agent) {
