@@ -9,7 +9,8 @@
 #include "logging/log.h"
 
 
-/** A linear Agent for which the distance between any two consecutive bets is a constant. */
+/** A linear Agent for which the distance between any two consecutive bets is a constant.
+    Note: if the step size and number of rounds is not coprime, this agent will make invalid moves. */
 class ChpLinearAgent : public Agent {
 public:
     virtual ~ChpLinearAgent() = default;
@@ -17,15 +18,15 @@ public:
     ChpLinearAgent(unsigned int const agent_id,
         int const step_in,
         unsigned int const start_in)
-    : Agent(agent_id), step(step_in), start(start_in)  {
-        LOG(DEBUG) << "Linear agent with id" << this->get_id();
+        : Agent(agent_id), step(step_in), start(start_in)  {
+        LOG(DEBUG) << "Linear agent id:" << this->get_id() << " start: " << this->start << " step: " << this->step;
     };
 
     void initialize_episode(InitialState& initial_state) {
         //InitialState& initial_state = static_cast<InitialState&>(initial_state);
         player_id = initial_state.player_id;
         bets = initial_state.bets;
-        next_bet = start;
+        next_bet = (start -1) % bets + 1;
         LOG(DEBUG) << "   linear agent " << this->get_id() << " episode initialized";
     };
 

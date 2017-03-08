@@ -1,19 +1,16 @@
+#pragma once
 /* 
  * File:   log.h
  * Author: Alberto Lepe <dev@alepe.com>
  *
- * Created on December 1, 2015, 6:00 PM
  */
 
-#ifndef LOG_H
-#define LOG_H
-
 #include <iostream>
-
 
 enum typelog {
     DEBUG,
     INFO,
+    EPSOD,
     QUIET,
     WARN,
     ERROR
@@ -65,4 +62,3 @@ private:
     }
 };
 
-#endif  /* LOG_H */

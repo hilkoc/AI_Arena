@@ -18,6 +18,7 @@ structlog LOGCFG;
 struct CmdParams {
   unsigned int bets;
   unsigned int games;
+  bool verbose;
   bool quiet;
   bool ignore_timeout;
   bool override_names;
@@ -32,6 +33,7 @@ CmdParams parse_cmdline_args(int argc, char ** argv) {
 
     TCLAP::SwitchArg overrideSwitch("o", "override", "Overrides player-sent names using cmd args [SERVER ONLY].", cmd, false);
     TCLAP::SwitchArg timeoutSwitch("t", "timeout", "Ignore timeouts. Gives all bots unlimited time).", cmd, false);
+    TCLAP::SwitchArg verboseSwitch("v", "verbose", "Show all output for each round.", cmd, false);
     TCLAP::SwitchArg quietSwitch("q", "quiet", "Don't show intermidate game output.", cmd, false);
 
     TCLAP::ValueArg<unsigned int> setsArg("s", "sets", "A set consists of p games where p is the number of players. Run g = s*p number of games.", false, 0, "number", cmd);   
@@ -46,6 +48,7 @@ CmdParams parse_cmdline_args(int argc, char ** argv) {
     cmdParams.bets = betsArg.getValue();
     cmdParams.games = gamesArg.getValue();
     unsigned int sets = setsArg.getValue();
+    cmdParams.verbose = verboseSwitch.getValue();
     cmdParams.quiet = quietSwitch.getValue();
     cmdParams.ignore_timeout = timeoutSwitch.getValue();
     cmdParams.override_names = overrideSwitch.getValue();
@@ -103,13 +106,23 @@ Agent* parse_run_cmd(std::string const& cmd, unsigned int const agent_id, ChpFac
             exit(1);
         }
     }
-
-    Agent* a = chpFactory.createAgent(agent_id);
-    return a;
+    if ("random" == cmd_parts[0]) {
+        return chpFactory.createAgent(agent_id);
+    }
+    LOG(ERROR) << "Unknown bot command: " << cmd;
+    exit(1);
+    return nullptr;
 };
 
 /** Creates and runs the environment with the given parameters. */
 int run_main(CmdParams& cmdParams) {
+    // Configure logging
+    if (cmdParams.verbose) {
+        LOGCFG.level = INFO;
+    }
+    if (cmdParams.quiet) {
+        LOGCFG.level = QUIET;  // -q flag overrides -v flag
+    }
 
     // Initialize the environment and create the agents.
     unsigned int agent_id(1);
@@ -134,7 +147,7 @@ int run_main(CmdParams& cmdParams) {
 
 int main(int argc, char ** argv) {
     LOGCFG.headers = false;
-    LOGCFG.level = QUIET;
+    LOGCFG.level = EPSOD; // default log level, only episode and session output.
     LOG(INFO) << "Starting Chicken Poker";
 
     // Initializing an unsigned with a negative nr gives garbage.

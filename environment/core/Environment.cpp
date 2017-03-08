@@ -30,7 +30,7 @@
 
     /** Signals all Agents that the episode is finished. After this function returns a new episode may be started. */
     void Environment::finalize_episode(Stats& episode_stats, Stats& session_stats){
-        LOG(INFO) << "Episode summary";
-        episode_stats.log_summary(INFO);
+        LOG(EPSOD) << "\nEpisode summary";
+        episode_stats.log_summary(EPSOD);
         session_stats.add_rewards(episode_stats.get_total_rewards());
     };

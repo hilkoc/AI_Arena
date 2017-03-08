@@ -15,13 +15,13 @@
 
 
 /** An Agent that plays random bets. */
-class ChpUniformAgent : public Agent {
+class ChpRandomAgent : public Agent {
 public:
-    virtual ~ChpUniformAgent() = default;
+    virtual ~ChpRandomAgent() = default;
 
-    ChpUniformAgent(unsigned int const agent_id) : Agent(agent_id) {
+    ChpRandomAgent(unsigned int const agent_id) : Agent(agent_id) {
         std::srand(unsigned (std::time(0)) ); // Initialize random nr generator.
-        LOG(DEBUG) << "Creating uniform agent " << this->get_id();
+        LOG(DEBUG) << "Creating random agent " << this->get_id();
     };
 
     void initialize_episode(InitialState& initial_state) {

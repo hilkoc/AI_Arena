@@ -23,7 +23,7 @@ public:
     };
 
     /** Logs the total stats */
-    void log_summary(typelog loglevel = QUIET) const {
+    void log_summary(typelog loglevel=QUIET) const {
         for (auto const& pair : this->total_rewards) {
             unsigned int const agent_id = pair.first->get_id() ;
             Reward total_reward = pair.second;

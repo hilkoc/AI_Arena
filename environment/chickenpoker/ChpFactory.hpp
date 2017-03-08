@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ChpState.hpp"
-#include "ChpUniformAgent.hpp"
+#include "ChpRandomAgent.hpp"
 #include "ChpLinearAgent.hpp"
 #include "core/Factory.hpp"
 #include <vector>
@@ -30,7 +30,7 @@ public:
     };
 
     Agent* createAgent(unsigned int const id) {
-        ChpUniformAgent* a = new ChpUniformAgent(id);
+        ChpRandomAgent* a = new ChpRandomAgent(id);
         this->agents.push_back(a);
         return a;
     }
