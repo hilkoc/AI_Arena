@@ -1,6 +1,5 @@
 #pragma once
 
-#include <vector>
 
 #include "core/Agent.hpp"
 #include "core/Action.hpp"
@@ -9,13 +8,11 @@
 
 #include "logging/log.h"
 
-class State;
-//class Action;
 
-/** The Agent. */
+/** A linear Agent for which the distance between any two consecutive bets is a constant. */
 class ChpLinearAgent : public Agent {
 public:
-    virtual ~ChpLinearAgent(){};
+    virtual ~ChpLinearAgent() = default;
 
     ChpLinearAgent(unsigned int const agent_id,
         int const step_in,

@@ -1,6 +1,10 @@
 #pragma once
 
+
 #include <vector>
+#include <random>
+#include <ctime>        // std::time
+#include <cstdlib>      // std::rand, std::srand
 
 #include "core/Agent.hpp"
 #include "core/Action.hpp"
@@ -9,25 +13,26 @@
 
 #include "logging/log.h"
 
-//class State;
-//class Action;
 
-/** The Agent. */
-class ChpAgent : public Agent {
+/** An Agent that plays random bets. */
+class ChpUniformAgent : public Agent {
 public:
-    virtual ~ChpAgent(){
-        LOG(DEBUG)  << "Destroying agent " << this->get_id();
-    };
+    virtual ~ChpUniformAgent() = default;
 
-    ChpAgent(unsigned int const agent_id) : Agent(agent_id) {
-        next_bet = 1;
-        LOG(DEBUG) << "Creating agent " << this->get_id();
+    ChpUniformAgent(unsigned int const agent_id) : Agent(agent_id) {
+        std::srand(unsigned (std::time(0)) ); // Initialize random nr generator.
+        LOG(DEBUG) << "Creating uniform agent " << this->get_id();
     };
 
     void initialize_episode(InitialState& initial_state) {
         //InitialState& initial_state = static_cast<InitialState&>(initial_state);
         player_id = initial_state.player_id;
         bets = initial_state.bets;
+        next_bets.clear();
+        for(unsigned int i =1; i <= bets; ++i) {
+            next_bets.push_back(i);
+        }
+        std::random_shuffle(next_bets.begin(), next_bets.end());
         LOG(DEBUG) << "   Agent " << this->get_id() << " episode initialized";
     };
 
@@ -40,8 +45,8 @@ public:
 
     virtual Action do_receive_state(ChpState& chpState) {
         //state->log_summary();
-        Action action(*this, this->next_bet);
-        next_bet += 1;
+        Action action(*this, this->next_bets.back());
+        next_bets.pop_back();
         return action;
     };
 
@@ -51,8 +56,8 @@ public:
 
 
 private:
-    // Changes per round
-    unsigned int next_bet;
+    // Get the next move from here
+    std::vector<unsigned int> next_bets;
 
     // These are set per episode
     unsigned int player_id;

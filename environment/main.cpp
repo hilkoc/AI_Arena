@@ -5,10 +5,8 @@ structlog LOGCFG;
 #include <tclap/CmdLine.h>
 #include "chickenpoker/ChpFactory.hpp"
 #include "chickenpoker/ChpState.hpp"
-#include "chickenpoker/ChpAgent.hpp"
+//#include "chickenpoker/ChpAgent.hpp"
 #include "core/Environment.hpp"
-
-//#include <iostream>
 
 #include <string>
 #include <sstream>
@@ -136,7 +134,7 @@ int run_main(CmdParams& cmdParams) {
 
 int main(int argc, char ** argv) {
     LOGCFG.headers = false;
-    LOGCFG.level = INFO;
+    LOGCFG.level = QUIET;
     LOG(INFO) << "Starting Chicken Poker";
 
     // Initializing an unsigned with a negative nr gives garbage.

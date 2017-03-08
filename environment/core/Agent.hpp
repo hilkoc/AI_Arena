@@ -13,7 +13,7 @@ class InitialState;
 /** The Agent. */
 class Agent {
 public:
-    virtual ~Agent(){};
+    virtual ~Agent() = default;
 
     Agent(unsigned int const agent_id) : id(agent_id) {};
 

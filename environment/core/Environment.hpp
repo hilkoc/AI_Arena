@@ -41,7 +41,7 @@ public:
             }
             this->finalize_episode(episode_stats, session_stats);
         }
-        LOG(QUIET) << "Session summary";
+        LOG(QUIET) << "\nSession summary";
         session_stats.log_summary();
     }
 
