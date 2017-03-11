@@ -26,6 +26,7 @@
     /** Prepares an episode. Creates the initial State and signals Agents to initialize. */
     void Environment::initialize_episode(){
         this->state->reset();
+        LOG(DEBUG) << "Episode initialized.";
     };
 
     /** Signals all Agents that the episode is finished. After this function returns a new episode may be started. */

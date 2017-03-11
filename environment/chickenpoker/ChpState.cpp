@@ -41,9 +41,7 @@ std::map<Agent*, Reward> ChpState::update(std::vector<Action>& actions) {
     Agent* round_winner = nullptr;
     std::sort(winners.begin(), winners.end(), [] (Agent* x, Agent* y) {
          return x->get_id() < y->get_id();} ); // Sort the agents by id.
-    for (Agent* a : winners) {
-        LOG(INFO) << "  sorted a_id " << a->get_id();
-    }
+//    for (Agent* a : winners) {LOG(INFO) << "  sorted a_id " << a->get_id();}
     unsigned int round_winner_idx = (max_bet + this->episode_count) % winners.size();
     round_winner = winners[round_winner_idx];
     LOG(INFO) << "Round " << bets - rounds << ". Player " << round_winner->get_id() << " wins " << wins;

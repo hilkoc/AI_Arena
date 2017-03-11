@@ -3,6 +3,7 @@
 #include "ChpState.hpp"
 #include "ChpRandomAgent.hpp"
 #include "ChpLinearAgent.hpp"
+#include "ChpHumanAgent.hpp"
 #include "core/Factory.hpp"
 #include <vector>
 
@@ -37,6 +38,12 @@ public:
 
     Agent* createLinearAgent(unsigned int const id, int step, unsigned int const start) {
         ChpLinearAgent* a = new ChpLinearAgent(id, step, start);
+        this->agents.push_back(a);
+        return a;
+    }
+
+    Agent* createHumanAgent(unsigned int const id) {
+        ChpHumanAgent* a = new ChpHumanAgent(id);
         this->agents.push_back(a);
         return a;
     }

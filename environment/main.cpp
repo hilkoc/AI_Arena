@@ -88,6 +88,9 @@ std::vector<std::string> split(std::string const& s, char delim) {
 
 Agent* parse_run_cmd(std::string const& cmd, unsigned int const agent_id, ChpFactory& chpFactory) {
     std::vector<std::string> cmd_parts = split(cmd, ' ');
+    if ("random" == cmd_parts[0]) {
+        return chpFactory.createAgent(agent_id);
+    }
     if ("linear" == cmd_parts[0]) {
         if (3 == cmd_parts.size()) {
             std::string start_s = cmd_parts[1];
@@ -106,9 +109,10 @@ Agent* parse_run_cmd(std::string const& cmd, unsigned int const agent_id, ChpFac
             exit(1);
         }
     }
-    if ("random" == cmd_parts[0]) {
-        return chpFactory.createAgent(agent_id);
+    if ("human" == cmd_parts[0]) {
+        return chpFactory.createHumanAgent(agent_id);
     }
+
     LOG(ERROR) << "Unknown bot command: " << cmd;
     exit(1);
     return nullptr;
