@@ -29,7 +29,7 @@ struct CmdParams {
 /** Parses arguments given on the command line and returns an object of type CmdParams. */
 CmdParams parse_cmdline_args(int argc, char ** argv) {
 
-    TCLAP::CmdLine cmd("Chicken Poker Game Environment", ' ', "0.0");
+    TCLAP::CmdLine cmd("Chicken Poker Game Environment", ' ', "0.1");
 
     TCLAP::SwitchArg overrideSwitch("o", "override", "Overrides player-sent names using cmd args [SERVER ONLY].", cmd, false);
     TCLAP::SwitchArg timeoutSwitch("t", "timeout", "Ignore timeouts. Gives all bots unlimited time).", cmd, false);
@@ -40,7 +40,7 @@ CmdParams parse_cmdline_args(int argc, char ** argv) {
     TCLAP::ValueArg<unsigned int> gamesArg("g", "games", "Run g number of games. Player ids are rotated after every game.", false, 1, "number", cmd);   
     TCLAP::ValueArg<unsigned int> betsArg("n", "bets", "The number of rounds in the game. This is also the value of the highest bet.", true, 10, "number", cmd);   
     //rm TCLAP::ValueArg<std::string> replayDirectoryArg("i", "replaydirectory", "The path to directory for replay output.", false, ".", "path to directory", cmd);
-    TCLAP::UnlabeledMultiArg<std::string> runcmdArgs("NonspecifiedArgs", "Run commands for bots.", false, "cmds in double quotes", cmd);
+    TCLAP::UnlabeledMultiArg<std::string> runcmdArgs("runCommands", "Run commands for bots.", false, "cmds in double quotes", cmd);
 
     cmd.parse(argc, argv);
 
@@ -89,7 +89,7 @@ std::vector<std::string> split(std::string const& s, char delim) {
 Agent* parse_run_cmd(std::string const& cmd, unsigned int const agent_id, ChpFactory& chpFactory) {
     std::vector<std::string> cmd_parts = split(cmd, ' ');
     if ("random" == cmd_parts[0]) {
-        return chpFactory.createAgent(agent_id);
+        return chpFactory.createRandomAgent(agent_id);
     }
     if ("linear" == cmd_parts[0]) {
         if (3 == cmd_parts.size()) {
@@ -98,7 +98,7 @@ Agent* parse_run_cmd(std::string const& cmd, unsigned int const agent_id, ChpFac
             int start = std::stoi(start_s);
             int step = std::stoi(step_s);
             if (start < 1) {
-                LOG(WARN) << "First parameter <start> must be > 1 for linear. Given " << start;
+                LOG(WARN) << "First parameter <start> must be positive. Given " << start;
                 exit(1);
             }
             return chpFactory.createLinearAgent(agent_id, step, start);
@@ -112,8 +112,7 @@ Agent* parse_run_cmd(std::string const& cmd, unsigned int const agent_id, ChpFac
     if ("human" == cmd_parts[0]) {
         return chpFactory.createHumanAgent(agent_id);
     }
-
-    LOG(ERROR) << "Unknown bot command: " << cmd;
+    return chpFactory.createNetworkAgent(agent_id, cmd);
     exit(1);
     return nullptr;
 };
@@ -133,14 +132,14 @@ int run_main(CmdParams& cmdParams) {
     ChpFactory chpFactory(cmdParams.bets);
     std::vector<Agent*> agents;
 
-    for (std::string const & cmd : cmdParams.run_commands) {
+    for (std::string const& cmd : cmdParams.run_commands) {
         Agent* a = parse_run_cmd(cmd, agent_id, chpFactory);
-        LOG(DEBUG) << "Created agent " << a->get_id();
+        LOG(EPSOD) << "Agent " << a->get_id() << ": " << cmd;
         agents.push_back(a);
         agent_id++;
     }
 
-    LOG(INFO) << "Starting " << cmdParams.games << " games, each with " 
+    LOG(EPSOD) << "Starting " << cmdParams.games << " games, each with " 
               << cmdParams.bets << " rounds.";
     Environment environment(chpFactory);
     environment.connect_agents(agents);

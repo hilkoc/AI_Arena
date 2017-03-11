@@ -4,6 +4,7 @@
 #include "ChpRandomAgent.hpp"
 #include "ChpLinearAgent.hpp"
 #include "ChpHumanAgent.hpp"
+#include "core/NetworkAgent.hpp"
 #include "core/Factory.hpp"
 #include <vector>
 
@@ -30,7 +31,7 @@ public:
         return *(chpState);
     };
 
-    Agent* createAgent(unsigned int const id) {
+    Agent* createRandomAgent(unsigned int const id) {
         ChpRandomAgent* a = new ChpRandomAgent(id);
         this->agents.push_back(a);
         return a;
@@ -44,6 +45,12 @@ public:
 
     Agent* createHumanAgent(unsigned int const id) {
         ChpHumanAgent* a = new ChpHumanAgent(id);
+        this->agents.push_back(a);
+        return a;
+    }
+
+    Agent* createNetworkAgent(unsigned int const id, std::string const& cmd) {
+        NetworkAgent* a = new NetworkAgent(id, cmd);
         this->agents.push_back(a);
         return a;
     }

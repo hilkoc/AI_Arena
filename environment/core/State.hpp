@@ -1,11 +1,12 @@
 #pragma once
 
-#include "logging/log.h"
+
 #include <vector>
 #include <map>
 //#include "Agent.hpp"
 #include "Action.hpp"
 #include "Reward.hpp"
+#include "logging/log.h"
 
 class Agent;
 //class Action;
@@ -30,4 +31,7 @@ public:
 
     /** Returns this */
     virtual Action send_to(Agent& agent) = 0;
+
+    /** Returns a string representation of this instance. */
+    //virtual std::string serialize() = 0;
 };

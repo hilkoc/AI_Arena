@@ -32,7 +32,7 @@ std::map<Agent*, Reward> ChpState::update(std::vector<Action>& actions) {
                 }
             }
         } else {
-            LOG(WARN) << "    INVALID ACTION Agent " << agent.get_id() << ": " << bet
+            LOG(WARN) << "INVALID ACTION Agent " << agent.get_id() << ": " << bet
                       << ". Dropping Agent.";
             this->remove_agent(agent);
         }

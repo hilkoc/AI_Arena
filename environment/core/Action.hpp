@@ -1,12 +1,21 @@
 #pragma once
 
+// #include "chickenpoker/ChpState.hpp"
+#include <string>
+
 //#include "Agent.hpp"
 class Agent;
 
 /** The action that agents send to the environment. */
 class Action {
 public:
-    virtual ~Action();
+    virtual ~Action() = default;
+
+    /** Factory method. Constructs an action from string. */
+    //static Action deserialize(Agent& agent, std::string const& action_msg);
+
+    /** Returns a string representation of this instance. */
+    virtual std::string serialize();
 
     Action(Agent& agent_in, unsigned int k) : agent(agent_in), bet(k) {};
 
@@ -22,3 +31,10 @@ private:
     Agent& agent;  // The agent that is doing this action.
     unsigned int bet; // The bet that is placed.
 };
+
+/** Static Factory method. Constructs an action from string. */
+//Action Action::deserialize(Agent& agent, std::string const& action_msg) {
+//    Action action(agent,1);
+//    return action;
+//};
+

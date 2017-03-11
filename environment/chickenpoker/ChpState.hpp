@@ -3,9 +3,11 @@
 #include <vector>
 #include <map>
 #include "core/State.hpp"
-#include "core/Agent.hpp"
+#include "core/Agent.hpp" // Forward declaration is not enough
 #include "core/Action.hpp"
 #include "core/Reward.hpp"
+
+class Agent;
 
 
 /** The information that an agent receives at the start of an episode. */
@@ -37,6 +39,7 @@ public:
     /** Agents may leave (unexpectedly) at any time. */
     virtual bool remove_agent(Agent& agent) {
         player_bets.erase(&agent);
+        return true;
     };
 
 
@@ -56,6 +59,15 @@ public:
     virtual Action send_to(Agent& agent) {
         return agent.receive_state(*this);;    
     };
+
+    // /** Factory method. Constructs an action from string. */
+    // static ChpState deserialize(std::string const& state_msg);
+
+    /** Returns a string representation of this instance. */
+//    virtual std::string serialize() {
+//        return "3";
+//    };
+
 
 private:
     /** The total number of rounds in the game, also the maximum bet. */
