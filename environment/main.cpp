@@ -149,11 +149,8 @@ int run_main(CmdParams& cmdParams) {
 
 int main(int argc, char ** argv) {
     LOGCFG.headers = false;
-    LOGCFG.level = EPSOD; // default log level, only episode and session output.
+    LOGCFG.level = EPSOD; // EPSOD default log level, only episode and session output.
     LOG(INFO) << "Starting Chicken Poker";
-
-    // Initializing an unsigned with a negative nr gives garbage.
-//    int k = -7;    unsigned int l = k;  LOG(INFO) << "k " << k << " l " << l;
 
     /** Parses the command line parameters, and runs the environment. */
     CmdParams cmdParams = parse_cmdline_args(argc, argv);

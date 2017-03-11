@@ -17,7 +17,7 @@ std::map<Agent*, Reward> ChpState::update(std::vector<Action>& actions) {
         Agent& agent = action.get_agent();
         unsigned int bet = action.get_bet();
         LOG(INFO) << "    Agent " << agent.get_id() << ": " << bet;
-        LOG(DEBUG) <<  "valid move? " << player_bets[&agent][bet]  <<  " true = " << true << " eq " << ( player_bets[&agent][bet] == true);
+        LOG(DEBUG) <<  "valid move? " << (player_bets[&agent][bet]? " true " : "false") ;
         if (player_bets[&agent][bet]) {
             player_bets[&agent][bet] = false;
             wins += bet;

@@ -38,9 +38,8 @@ public:
     };
 
     virtual Action do_receive_state(ChpState& chpState) {
-        //state->log_summary();
         Action action(*this, this->next_bet);
-        next_bet = (next_bet - 1 + step) % bets + 1;
+        next_bet = (next_bet - 1 + step + bets) % bets + 1;
         return action;
     };
 
