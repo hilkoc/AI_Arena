@@ -23,9 +23,9 @@ public:
 /** The state. */
 class ChpState : public State {
 public:
-    virtual ~ChpState(){};
+    virtual ~ChpState() = default;
 
-    ChpState(unsigned int bets_in) : bets(bets_in), rounds(bets_in) {};
+    ChpState(unsigned int bets_in) : bets(bets_in), rounds(bets_in), episode_count(0) {};
 
     virtual std::map<Agent*, Reward> update(std::vector<Action>& actions);
 
@@ -42,6 +42,7 @@ public:
 
     virtual void reset(){
         rounds = bets;
+        episode_count += 1;
         for (auto& pair : player_bets) {
             std::vector<bool>& bets = pair.second;
             std::fill(bets.begin(), bets.end(), true);
@@ -65,5 +66,8 @@ private:
 
     /** player_bets[player][k] is true indicates that player is allowed to play action k. */
     std::map<Agent*, std::vector<bool> > player_bets;
+
+    /** Used to break ties. This counter incremented at the start of every episode. This way there is not a single agent that has an advantage every episode. */
+    unsigned int episode_count;
 };
 

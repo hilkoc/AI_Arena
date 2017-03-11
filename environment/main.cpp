@@ -136,6 +136,8 @@ int run_main(CmdParams& cmdParams) {
         agent_id++;
     }
 
+    LOG(INFO) << "Starting " << cmdParams.games << " games, each with " 
+              << cmdParams.bets << " rounds.";
     Environment environment(chpFactory);
     environment.connect_agents(agents);
     environment.run_episodes(cmdParams.games);
