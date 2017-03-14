@@ -12,7 +12,7 @@ public:
     virtual ~Action() = default;
 
     /** Factory method. Constructs an action from string. */
-    //static Action deserialize(Agent& agent, std::string const& action_msg);
+    static Action deserialize(Agent& agent, std::string const& action_msg);
 
     /** Returns a string representation of this instance. */
     virtual std::string serialize();
@@ -32,9 +32,4 @@ private:
     unsigned int bet; // The bet that is placed.
 };
 
-/** Static Factory method. Constructs an action from string. */
-//Action Action::deserialize(Agent& agent, std::string const& action_msg) {
-//    Action action(agent,1);
-//    return action;
-//};
 

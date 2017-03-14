@@ -5,7 +5,7 @@
 #include <chrono>
 #include <thread>
 #include <mutex>
-
+#include <sstream>
 
 // TODO check which includes are necessary
 #ifdef _WIN32
@@ -28,21 +28,36 @@
 
 std::mutex cout_mutex;
 
-
+// constructor
 NetworkAgent::NetworkAgent(unsigned int const agent_id, std::string const& cmd)
     : Agent(agent_id) {
     LOG(INFO) << "Creating NetworkAgent " << cmd;
 };
 
 
+std::string to_string(int n) {
+    std::ostringstream oss;
+    oss << n;
+    return oss.str();
+};
+
 /** Message the subprocess to reset for a new episode and send the initial state. */
-void NetworkAgent::initialize_episode(InitialState& initial_state) {};
+void NetworkAgent::initialize_episode(InitialState& initial_state) {
+        std::string player_id, bets;
+        player_id = to_string(this->get_id());
+        bets = to_string(initial_state.bets);
+        // TODO send the above to the subprocess
+        sendString(player_id);
+        sendString(bets);
+        LOG(INFO) << "Network Agent eps init sending id " << player_id << " and bets " << bets << ".";
+    };
 
 
 Action do_receive_state(NetworkAgent* this_agent, ChpState& chpState);
 
 /** React with an action to the observed state. */
 Action NetworkAgent::receive_state(State& state) {
+    LOG(DEBUG) << "network agent receive_state";
     // Have to cast state down to its known subtype, otherwise all possible subtypes of State
     // will have to appear in the top level inerface of Agent.
     ChpState& chpState = static_cast<ChpState&>(state);
@@ -58,13 +73,15 @@ Action do_receive_state(NetworkAgent* this_agent, ChpState& chpState) {
         unsigned int const MAX_TIME_MILLIS(3000); // 3 sec.
         // Convert the state to a string
         std::string state_msg = "state"; // TODO  chpState.serialize();
+
+        LOG(DEBUG) << "network agent sendString: " << state_msg;
         // Send the state_string
         this_agent->sendString(state_msg);
         // Receive the action as string
         std::string action_msg = this_agent->getString(MAX_TIME_MILLIS);
         // Deserialize and return the action
         Action action(*this_agent, 2); // = Action::deserialize(*this_agent, action_msg);
-
+        LOG(DEBUG) << "network agent return action;";
         return action;
 };
 
@@ -86,7 +103,9 @@ void NetworkAgent::sendString(std::string& msg) {
 
 #else
     //UniConnection connection = this->connection;
+    LOG(DEBUG) << "network agent 1 ssize_t charsWritten = write(connection.write,... ";
     ssize_t charsWritten = write(connection.write, msg.c_str(), msg.length());
+    LOG(DEBUG) << "network agent 2 ssize_t charsWritten = write(connection.write,... ";
     if(charsWritten < msg.length()) {
         LOG(ERROR) << "Problem writing to pipe\n";
         throw 1;
@@ -122,7 +141,9 @@ std::string NetworkAgent::getString(unsigned int const timeoutMillis) {
         if(bytesAvailable < 1) {
             std::chrono::high_resolution_clock::time_point initialTime = std::chrono::high_resolution_clock::now();
             while (bytesAvailable < 1) {
-                if(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - initialTime).count() > timeoutMillisRemaining) throw newString;
+                if(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - initialTime).count() > timeoutMillisRemaining) {
+                    throw newString;
+                }
                 PeekNamedPipe(connection.read, NULL, 0, NULL, &bytesAvailable, NULL);
             }
         }
@@ -136,8 +157,12 @@ std::string NetworkAgent::getString(unsigned int const timeoutMillis) {
             }
             throw newString;
         }
-        if(buffer == '\n') break;
-        else newString += buffer;
+        if(buffer == '\n') {
+            break;
+        }
+        else {
+            newString += buffer;
+        }
     }
 #else
     // UniConnection connection = connections[playerTag - 1];
@@ -174,7 +199,9 @@ std::string NetworkAgent::getString(unsigned int const timeoutMillis) {
     }
 #endif
     //Python turns \n into \r\n
-    if(newString.back() == '\r') newString.pop_back();
+    if(newString.back() == '\r') {
+        newString.pop_back();
+    }
 
     return newString;
 

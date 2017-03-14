@@ -35,7 +35,7 @@ public:
 
     // virtual Action do_receive_state(ChpState& chpState);
 
-private:
+protected:
 
 #ifdef _WIN32
     struct WinConnection {
@@ -52,5 +52,12 @@ private:
     UniConnection connection;
     int process;
 #endif
+
+private:
+    // Record which bets have been made, changes every round
+    std::vector<bool> allowed_bets;
+
+    // These are set per episode
+    unsigned int bets;
 };
 

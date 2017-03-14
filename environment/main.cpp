@@ -152,7 +152,7 @@ int run_main(CmdParams& cmdParams) {
 
 int main(int argc, char ** argv) {
     LOGCFG.headers = false;
-    LOGCFG.level = EPSOD; // EPSOD default log level, only episode and session output.
+    LOGCFG.level = DEBUG; // EPSOD default log level, only episode and session output.
     LOG(INFO) << "Starting Chicken Poker";
 
     /** Parses the command line parameters, and runs the environment. */
