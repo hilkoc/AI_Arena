@@ -1,7 +1,10 @@
 """ Chicken Poker random bot. """
 
-_myID = -1
-_max_bet = -1
+import logging
+logging.basicConfig(filename='chp_bot.log', level=logging.DEBUG, filemode='w')
+log = logging.getLogger(__name__)
+log.info("Starting")
+
 
 #  
 # Networking
@@ -23,19 +26,17 @@ def get_string():
 
 
 def get_init():
-    global _myID
-    global _max_bet
-    _myID = int(get_string())
-    _max_bet = int(get_string())
-    return (_myID, _max_bet)
+    myID = int(get_string())
+    max_bet = int(get_string())
+    return (myID, max_bet)
 
 
 def send_init(name):
     send_string(name)
 
 
-def get_frame():
-    return deserialize_round(get_string())
+def get_frame(frame):
+    return deserialize_round(frame)
 
 
 def send_frame(bet):
@@ -47,24 +48,53 @@ def send_frame(bet):
 #
 import random
 
-myID, max_bet = get_init()
+class Bot(object):
+    def __init__(self, name):
+        self.name = name
+        self.id = None
+        self.max_bet = None
+        self.bets = None
 
-bets = list(range(max_bet))
-random.shuffle(bets)
+    def reset(self):
+        """ Starts a new episode """
+        self.id, self.max_bet = get_init()
+        log.info("myID, max_bet = %s %s", str(self.id), str(self.max_bet))
 
-send_init("MyBot")
+        self.bets = list(range(1, 1 + self.max_bet))
+        random.shuffle(self.bets)
+
+        log.info("send_init(%s)", self.name)
+        send_init(self.name)
 
 
+    def get_bet(self):
+        """ Calculate the next bet to play """
+        return self.bets.pop()
 
-def get_bet():
-    return 1 + bets.pop()
-
-
-while True:
-    try:
-        last_round = get_frame()
-        bet = get_bet()
+    def play_round(self, frame):
+        last_round = get_frame(frame)
+        log.debug("last_round %s", last_round)
+        bet = self.get_bet()
+        log.debug("send_frame %s", str(bet))
         send_frame(str(bet))
-    except Exception as e:
-        print(e)
-        break
+
+
+def main():
+    bot = Bot("MyBot")
+    while True:
+        try:
+            frame = get_string()
+            if "RESET" == frame:
+                bot.reset()
+            else:
+                bot.play_round(frame)
+        except Exception as e:
+            print(e)
+            log.exception(e)
+            break
+
+
+
+if __name__ == "__main__":
+    main()
+

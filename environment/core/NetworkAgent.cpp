@@ -31,7 +31,8 @@ std::mutex cout_mutex;
 // constructor
 NetworkAgent::NetworkAgent(unsigned int const agent_id, std::string const& cmd)
     : Agent(agent_id) {
-    LOG(INFO) << "Creating NetworkAgent " << cmd;
+    LOG(INFO) << "Creating NetworkAgent, running: " << cmd;
+    this->start_subprocess(cmd);
 };
 
 
@@ -43,13 +44,17 @@ std::string to_string(int n) {
 
 /** Message the subprocess to reset for a new episode and send the initial state. */
 void NetworkAgent::initialize_episode(InitialState& initial_state) {
-        std::string player_id, bets;
+        unsigned int const MAX_INIT_TIME_MILLIS(10000); // 10 sec
+        std::string reset, player_id, bets;
+        reset = "RESET";
+        sendString(reset);
         player_id = to_string(this->get_id());
         bets = to_string(initial_state.bets);
-        // TODO send the above to the subprocess
         sendString(player_id);
         sendString(bets);
         LOG(INFO) << "Network Agent eps init sending id " << player_id << " and bets " << bets << ".";
+        std::string const botname = this->getString(MAX_INIT_TIME_MILLIS);
+        LOG(INFO) << "Network Agent bot name: " << botname;
     };
 
 
@@ -80,10 +85,136 @@ Action do_receive_state(NetworkAgent* this_agent, ChpState& chpState) {
         // Receive the action as string
         std::string action_msg = this_agent->getString(MAX_TIME_MILLIS);
         // Deserialize and return the action
-        Action action(*this_agent, 2); // = Action::deserialize(*this_agent, action_msg);
-        LOG(DEBUG) << "network agent return action;";
+        LOG(INFO) << "network agent deserialize action; " << action_msg;
+        Action action = Action::deserialize(*this_agent, action_msg);
+
         return action;
 };
+
+// Start the subprocess
+void NetworkAgent::start_subprocess(std::string command) {
+#ifdef _WIN32
+
+    command = "/C " + command;
+    WinConnection parentConnection, childConnection;
+
+    SECURITY_ATTRIBUTES saAttr;
+    saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
+    saAttr.bInheritHandle = TRUE;
+    saAttr.lpSecurityDescriptor = NULL;
+
+    //Child stdout pipe
+    if(!CreatePipe(&parentConnection.read, &childConnection.write, &saAttr, 0)) {
+        if(!quiet_output) std::cout << "Could not create pipe\n";
+        throw 1;
+    }
+    if(!SetHandleInformation(parentConnection.read, HANDLE_FLAG_INHERIT, 0)) throw 1;
+
+    //Child stdin pipe
+    if(!CreatePipe(&childConnection.read, &parentConnection.write, &saAttr, 0)) {
+        if(!quiet_output) std::cout << "Could not create pipe\n";
+        throw 1;
+    }
+    if(!SetHandleInformation(parentConnection.write, HANDLE_FLAG_INHERIT, 0)) throw 1;
+
+    //MAKE SURE THIS MEMORY IS ERASED
+    PROCESS_INFORMATION piProcInfo;
+    ZeroMemory(&piProcInfo, sizeof(PROCESS_INFORMATION));
+
+    STARTUPINFO siStartInfo;
+    ZeroMemory(&siStartInfo, sizeof(STARTUPINFO));
+    siStartInfo.cb = sizeof(STARTUPINFO);
+    siStartInfo.hStdError = childConnection.write;
+    siStartInfo.hStdOutput = childConnection.write;
+    siStartInfo.hStdInput = childConnection.read;
+    siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
+
+    //C:/xampp/htdocs/Halite/Halite/Debug/ExampleBot.exe
+    //C:/Users/Michael/Anaconda3/python.exe
+    //C:/Program Files/Java/jre7/bin/java.exe -cp C:/xampp/htdocs/Halite/AIResources/Java MyBot
+    bool success = CreateProcess(
+        "C:\\windows\\system32\\cmd.exe",
+        LPSTR(command.c_str()),     //command line
+        NULL,          //process security attributes
+        NULL,          //primary thread security attributes
+        TRUE,          //handles are inherited
+        0,             //creation flags
+        NULL,          //use parent's environment
+        NULL,          //use parent's current directory
+        &siStartInfo,  //STARTUPINFO pointer
+        &piProcInfo
+    );  //receives PROCESS_INFORMATION
+    if(!success) {
+        LOG(ERROR) << "Could not start process";
+        throw 1;
+    }
+    else {
+        CloseHandle(piProcInfo.hProcess);
+        CloseHandle(piProcInfo.hThread);
+
+        this->process = piProcInfo.hProcess;
+        this->connection = parentConnection;
+    }
+
+#else
+
+    LOG(DEBUG) << "Starting to run: " << command;
+
+    pid_t pid;
+    int writePipe[2];
+    int readPipe[2];
+
+    if(pipe(writePipe)) {
+        LOG(ERROR) << "Error creating pipe";
+        throw 1;
+    }
+    if(pipe(readPipe)) {
+        LOG(ERROR) << "Error creating pipe";
+        throw 1;
+    }
+
+    pid_t ppid_before_fork = getpid();
+
+    //Fork a child process
+    pid = fork();
+    if(pid == 0) { //This is the child
+        setpgid(getpid(), getpid());
+
+#ifdef __linux__
+        // install a parent death signal
+        // http://stackoverflow.com/a/36945270
+        int r = prctl(PR_SET_PDEATHSIG, SIGTERM);
+        if (r == -1)
+        {
+            LOG(ERROR) << "Error installing parent death signal";
+            throw 1;
+        }
+        if (getppid() != ppid_before_fork)
+            exit(1);
+#endif
+
+        dup2(writePipe[0], STDIN_FILENO);
+
+        dup2(readPipe[1], STDOUT_FILENO);
+        dup2(readPipe[1], STDERR_FILENO);
+
+        execl("/bin/sh", "sh", "-c", command.c_str(), (char*) NULL);
+
+        //Nothing past the execl should be run
+
+        exit(1);
+    } else if(pid < 0) {
+        LOG(ERROR) << "Fork failed\n";
+        throw 1;
+    }
+
+    this->connection.read = readPipe[0];
+    this->connection.write = writePipe[1];
+
+    this->process = pid;
+
+#endif
+}
 
 
 void NetworkAgent::sendString(std::string& msg) {
@@ -121,7 +252,7 @@ std::string NetworkAgent::getString(unsigned int const timeoutMillis) {
     std::string newString;
     int timeoutMillisRemaining = timeoutMillis;
     std::chrono::high_resolution_clock::time_point tp = std::chrono::high_resolution_clock::now();
-    
+
 #ifdef _WIN32
     // WinConnection connection = connections[playerTag - 1];
 

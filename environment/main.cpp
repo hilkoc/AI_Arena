@@ -2,7 +2,7 @@
 //Log Config
 structlog LOGCFG;
 
-#include <tclap/CmdLine.h>
+#include "tclap/CmdLine.h"
 #include "chickenpoker/ChpFactory.hpp"
 #include "chickenpoker/ChpState.hpp"
 //#include "chickenpoker/ChpAgent.hpp"
@@ -18,6 +18,7 @@ structlog LOGCFG;
 struct CmdParams {
   unsigned int bets;
   unsigned int games;
+  bool debug;
   bool verbose;
   bool quiet;
   bool ignore_timeout;
@@ -33,12 +34,13 @@ CmdParams parse_cmdline_args(int argc, char ** argv) {
 
     TCLAP::SwitchArg overrideSwitch("o", "override", "Overrides player-sent names using cmd args [SERVER ONLY].", cmd, false);
     TCLAP::SwitchArg timeoutSwitch("t", "timeout", "Ignore timeouts. Gives all bots unlimited time).", cmd, false);
+    TCLAP::SwitchArg debugSwitch("d", "debug", "Show all output, including debug.", cmd, false);
     TCLAP::SwitchArg verboseSwitch("v", "verbose", "Show all output for each round.", cmd, false);
     TCLAP::SwitchArg quietSwitch("q", "quiet", "Don't show intermidate game output.", cmd, false);
 
-    TCLAP::ValueArg<unsigned int> setsArg("s", "sets", "A set consists of p games where p is the number of players. Run g = s*p number of games.", false, 0, "number", cmd);   
-    TCLAP::ValueArg<unsigned int> gamesArg("g", "games", "Run g number of games. Player ids are rotated after every game.", false, 1, "number", cmd);   
-    TCLAP::ValueArg<unsigned int> betsArg("n", "bets", "The number of rounds in the game. This is also the value of the highest bet.", true, 10, "number", cmd);   
+    TCLAP::ValueArg<unsigned int> setsArg("s", "sets", "A set consists of p games where p is the number of players. Run g = s*p number of games.", false, 0, "number", cmd);
+    TCLAP::ValueArg<unsigned int> gamesArg("g", "games", "Run g number of games. Player ids are rotated after every game.", false, 1, "number", cmd);
+    TCLAP::ValueArg<unsigned int> betsArg("n", "bets", "The number of rounds in the game. This is also the value of the highest bet.", true, 10, "number", cmd);
     //rm TCLAP::ValueArg<std::string> replayDirectoryArg("i", "replaydirectory", "The path to directory for replay output.", false, ".", "path to directory", cmd);
     TCLAP::UnlabeledMultiArg<std::string> runcmdArgs("runCommands", "Run commands for bots.", false, "cmds in double quotes", cmd);
 
@@ -48,6 +50,7 @@ CmdParams parse_cmdline_args(int argc, char ** argv) {
     cmdParams.bets = betsArg.getValue();
     cmdParams.games = gamesArg.getValue();
     unsigned int sets = setsArg.getValue();
+    cmdParams.debug = debugSwitch.getValue();
     cmdParams.verbose = verboseSwitch.getValue();
     cmdParams.quiet = quietSwitch.getValue();
     cmdParams.ignore_timeout = timeoutSwitch.getValue();
@@ -120,6 +123,9 @@ Agent* parse_run_cmd(std::string const& cmd, unsigned int const agent_id, ChpFac
 /** Creates and runs the environment with the given parameters. */
 int run_main(CmdParams& cmdParams) {
     // Configure logging
+    if (cmdParams.debug) {
+        LOGCFG.level = DEBUG;
+    }
     if (cmdParams.verbose) {
         LOGCFG.level = INFO;
     }
@@ -139,7 +145,7 @@ int run_main(CmdParams& cmdParams) {
         agent_id++;
     }
 
-    LOG(EPSOD) << "Starting " << cmdParams.games << " games, each with " 
+    LOG(EPSOD) << "Starting " << cmdParams.games << " games, each with "
               << cmdParams.bets << " rounds.";
     Environment environment(chpFactory);
     environment.connect_agents(agents);
@@ -152,11 +158,10 @@ int run_main(CmdParams& cmdParams) {
 
 int main(int argc, char ** argv) {
     LOGCFG.headers = false;
-    LOGCFG.level = DEBUG; // EPSOD default log level, only episode and session output.
+    LOGCFG.level = EPSOD; // EPSOD default log level, only episode and session output.
     LOG(INFO) << "Starting Chicken Poker";
 
     /** Parses the command line parameters, and runs the environment. */
     CmdParams cmdParams = parse_cmdline_args(argc, argv);
     return run_main(cmdParams);
 }
-

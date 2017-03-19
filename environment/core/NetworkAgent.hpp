@@ -37,11 +37,14 @@ public:
 
 protected:
 
+/** Called from the constructor. Runs the given command in a subprocess*/
+void start_subprocess(std::string command);
+
 #ifdef _WIN32
     struct WinConnection {
         HANDLE write, read;
     };
-    
+
     WinConnection connection;
     HANDLE process;
 #else
@@ -60,4 +63,3 @@ private:
     // These are set per episode
     unsigned int bets;
 };
-
