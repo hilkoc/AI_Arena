@@ -1,3 +1,7 @@
+/**
+ * Based on
+ * https://github.com/HaliteChallenge/Halite/blob/master/environment/networking/Networking.cpp
+ */
 #include "NetworkAgent.hpp"
 #include "chickenpoker/ChpState.hpp"
 #include "logging/log.h"
@@ -69,9 +73,6 @@ Action NetworkAgent::receive_state(State& state) {
     return do_receive_state(this, chpState);
 };
 
-
-//void NetworkAgent::sendString(std::string& msg); //forward declare
-
 // TODO make this a virtual member function
 /** Send the state to the subprocess, wait until the timeout for a response. */
 Action do_receive_state(NetworkAgent* this_agent, ChpState& chpState) {
@@ -87,9 +88,9 @@ Action do_receive_state(NetworkAgent* this_agent, ChpState& chpState) {
         // Deserialize and return the action
         LOG(INFO) << "network agent deserialize action; " << action_msg;
         Action action = Action::deserialize(*this_agent, action_msg);
-
         return action;
 };
+
 
 // Start the subprocess
 void NetworkAgent::start_subprocess(std::string command) {
@@ -105,17 +106,21 @@ void NetworkAgent::start_subprocess(std::string command) {
 
     //Child stdout pipe
     if(!CreatePipe(&parentConnection.read, &childConnection.write, &saAttr, 0)) {
-        if(!quiet_output) std::cout << "Could not create pipe\n";
+        LOG(ERROR) << "Could not create pipe";
         throw 1;
     }
-    if(!SetHandleInformation(parentConnection.read, HANDLE_FLAG_INHERIT, 0)) throw 1;
+    if(!SetHandleInformation(parentConnection.read, HANDLE_FLAG_INHERIT, 0)) {
+        throw 1;
+    }
 
     //Child stdin pipe
     if(!CreatePipe(&childConnection.read, &parentConnection.write, &saAttr, 0)) {
-        if(!quiet_output) std::cout << "Could not create pipe\n";
+        LOG(ERROR) << "Could not create pipe";
         throw 1;
     }
-    if(!SetHandleInformation(parentConnection.write, HANDLE_FLAG_INHERIT, 0)) throw 1;
+    if(!SetHandleInformation(parentConnection.write, HANDLE_FLAG_INHERIT, 0)) {
+        throw 1;
+    }
 
     //MAKE SURE THIS MEMORY IS ERASED
     PROCESS_INFORMATION piProcInfo;
@@ -157,9 +162,6 @@ void NetworkAgent::start_subprocess(std::string command) {
     }
 
 #else
-
-    LOG(DEBUG) << "Starting to run: " << command;
-
     pid_t pid;
     int writePipe[2];
     int readPipe[2];
@@ -184,13 +186,13 @@ void NetworkAgent::start_subprocess(std::string command) {
         // install a parent death signal
         // http://stackoverflow.com/a/36945270
         int r = prctl(PR_SET_PDEATHSIG, SIGTERM);
-        if (r == -1)
-        {
+        if (r == -1) {
             LOG(ERROR) << "Error installing parent death signal";
             throw 1;
         }
-        if (getppid() != ppid_before_fork)
+        if (getppid() != ppid_before_fork) {
             exit(1);
+        }
 #endif
 
         dup2(writePipe[0], STDIN_FILENO);
@@ -204,7 +206,7 @@ void NetworkAgent::start_subprocess(std::string command) {
 
         exit(1);
     } else if(pid < 0) {
-        LOG(ERROR) << "Fork failed\n";
+        LOG(ERROR) << "Fork failed";
         throw 1;
     }
 
@@ -228,7 +230,7 @@ void NetworkAgent::sendString(std::string& msg) {
     bool success;
     success = WriteFile(connection.write, msg.c_str(), msg.length(), &charsWritten, NULL);
     if(!success || charsWritten == 0) {
-        LOG(ERROR) << "Problem writing to pipe\n";
+        LOG(ERROR) << "Problem writing to pipe";
         throw 1;
     }
 
@@ -238,7 +240,7 @@ void NetworkAgent::sendString(std::string& msg) {
     ssize_t charsWritten = write(connection.write, msg.c_str(), msg.length());
     LOG(DEBUG) << "network agent 2 ssize_t charsWritten = write(connection.write,... ";
     if(charsWritten < msg.length()) {
-        LOG(ERROR) << "Problem writing to pipe\n";
+        LOG(ERROR) << "Problem writing to pipe";
         throw 1;
     }
 #endif
@@ -247,7 +249,6 @@ void NetworkAgent::sendString(std::string& msg) {
 
 
 std::string NetworkAgent::getString(unsigned int const timeoutMillis) {
-    bool quiet_output = false;
 
     std::string newString;
     int timeoutMillisRemaining = timeoutMillis;
@@ -263,7 +264,9 @@ std::string NetworkAgent::getString(unsigned int const timeoutMillis) {
     //Keep reading char by char until a newline
     while(true) {
         timeoutMillisRemaining = timeoutMillis - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - tp).count();
-        if(timeoutMillisRemaining < 0) throw newString;
+        if(timeoutMillisRemaining < 0) {
+            throw newString;
+        }
         //Check to see that there are bytes in the pipe before reading
         //Throw error if no bytes in alloted time
         //Check for bytes before sampling clock, because reduces latency (vast majority the pipe is alread full)
@@ -281,11 +284,9 @@ std::string NetworkAgent::getString(unsigned int const timeoutMillis) {
 
         success = ReadFile(connection.read, &buffer, 1, &charsRead, NULL);
         if(!success || charsRead < 1) {
-            if(!quiet_output) {
-                std::string errorMessage = "Bot #" + std::to_string(playerTag) + " timed out or errored (Windows)\n";
-                std::lock_guard<std::mutex> guard(cout_mutex);
-                std::cout << errorMessage;
-            }
+            std::string errorMessage = "Bot #" + std::to_string(playerTag) + " timed out or errored (Windows)\n";
+            std::lock_guard<std::mutex> guard(cout_mutex);
+            LOG(ERROR) << errorMessage;
             throw newString;
         }
         if(buffer == '\n') {
@@ -308,7 +309,9 @@ std::string NetworkAgent::getString(unsigned int const timeoutMillis) {
 
         //Check if there are bytes in the pipe
         timeoutMillisRemaining = timeoutMillis - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - tp).count();
-        if(timeoutMillisRemaining < 0) throw newString;
+        if(timeoutMillisRemaining < 0) {
+            throw newString;
+        }
         struct timeval timeout;
         timeout.tv_sec = timeoutMillisRemaining / 1000.0;
         timeout.tv_usec = (timeoutMillisRemaining % 1000)*1000;
@@ -317,14 +320,15 @@ std::string NetworkAgent::getString(unsigned int const timeoutMillis) {
         if(selectionResult > 0) {
             read(connection.read, &buffer, 1);
 
-            if(buffer == '\n') break;
-            else newString += buffer;
-        } else {
-            if(!quiet_output) {
-                std::string errorMessage = "Bot #" + std::to_string(this->get_id()) + " timeout or error (Unix) " + std::to_string(selectionResult) + '\n';
-                std::lock_guard<std::mutex> guard(cout_mutex);
-                std::cout << errorMessage;
+            if(buffer == '\n') {
+                break;
+            } else {
+                newString += buffer;
             }
+        } else {
+            std::string errorMessage = "Bot #" + std::to_string(this->get_id()) + " timeout or error (Unix) " + std::to_string(selectionResult) + '\n';
+            std::lock_guard<std::mutex> guard(cout_mutex);
+            LOG(ERROR) << errorMessage;
             throw newString;
         }
     }
@@ -335,5 +339,4 @@ std::string NetworkAgent::getString(unsigned int const timeoutMillis) {
     }
 
     return newString;
-
 };
