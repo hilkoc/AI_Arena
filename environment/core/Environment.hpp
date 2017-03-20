@@ -17,7 +17,7 @@
 class Environment {
 public:
     virtual ~Environment();
- 
+
     Environment(Factory& factoryImpl): factory(factoryImpl) {};
 
     /** Initializes a session for multiple episodes. Connects all agents. */
@@ -31,15 +31,15 @@ public:
     For each episode run iterations with connected agents and evolves the game state until the termination condition is met. */
     virtual void run_episodes(unsigned int nr =1) {
         Stats session_stats;
-        for (int episode_nr = 1; episode_nr <= nr; ++episode_nr) {
+        for (unsigned int episode_nr = 1; episode_nr <= nr; ++episode_nr) {
             LOG(INFO) << "Starting episode " << episode_nr;
             Stats episode_stats;
-            
+
             this->initialize_episode();
             while (!state->termination_condition()) {
                 this->step(episode_stats);
             }
-            this->finalize_episode(episode_stats, session_stats);
+            this->finalize_episode(episode_nr, episode_stats, session_stats);
         }
         LOG(QUIET) << "\nSession summary";
         session_stats.log_summary();
@@ -73,10 +73,9 @@ protected:
     }
 
     /** Signals all Agents that the episode is finished. After this function returns a new episode may be started. */
-    virtual void finalize_episode(Stats& episode_stats, Stats& session_stats);
+    virtual void finalize_episode(unsigned int episode_nr, Stats& episode_stats, Stats& session_stats);
 
     Factory& factory;
     State* state;
     std::vector<Agent*> agents;
 };
-

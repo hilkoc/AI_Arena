@@ -4,7 +4,7 @@
 bool ChpState::termination_condition() {
     // Ends when there are no more rounds to be played or no more players to play against.
     LOG(DEBUG) << "Rounds: " << this->rounds << ", players left: " << this->player_bets.size();
-    return this->rounds == 0 || this->player_bets.size() < 2;  
+    return this->rounds == 0 || this->player_bets.size() < 2;
 };
 
 std::map<Agent*, Reward> ChpState::update(std::vector<Action>& actions) {
@@ -24,7 +24,7 @@ std::map<Agent*, Reward> ChpState::update(std::vector<Action>& actions) {
             if (bet == max_bet) {
                 LOG(DEBUG) << " A Tie needs to be broken.";
                 winners.push_back(&agent);
-            } else { 
+            } else {
                 if (bet > max_bet) {
                     max_bet = bet;
                     winners.clear();
@@ -56,6 +56,5 @@ bool ChpState::add_agents(std::vector<Agent*>& agents){
         // For convience make the vector size one bigger than needed. Ignore 0th index.
         player_bets[agent] = std::vector<bool>(1 + this->bets);
     }
-    LOG(DEBUG) << "Total agents " << player_bets.size();
+    LOG(DEBUG) << "Total agents " << player_bets.size() - 1;
 };
-

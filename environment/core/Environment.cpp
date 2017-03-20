@@ -2,7 +2,7 @@
 
 
     Environment::~Environment() {
-        this->disconnect_agents();  
+        this->disconnect_agents();
     }
 
     /** Initializes a session for multiple episodes. Connects all agents. */
@@ -30,8 +30,8 @@
     };
 
     /** Signals all Agents that the episode is finished. After this function returns a new episode may be started. */
-    void Environment::finalize_episode(Stats& episode_stats, Stats& session_stats){
-        LOG(EPSOD) << "\nEpisode summary";
+    void Environment::finalize_episode(unsigned int episode_nr, Stats& episode_stats, Stats& session_stats){
+        LOG(EPSOD) << "\nEpisode " << episode_nr << " summary";
         episode_stats.log_summary(EPSOD);
         session_stats.add_rewards(episode_stats.get_total_rewards());
     };
