@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <map>
+#include <sstream>
 #include "core/State.hpp"
 #include "core/Agent.hpp" // Forward declaration is not enough
 #include "core/Action.hpp"
@@ -18,9 +19,35 @@ public:
     // The player id for breaking ties.
     unsigned int const player_id;
     unsigned int const bets;
+    // TODO  add total number of players
 };
 
-//class Action; //
+
+/** The information passed to a particular agent at each update step. */
+class AgentState {
+public:
+    AgentState(std::map<Agent*, unsigned int> & last_round_in) : last_round(last_round_in) {};
+
+    std::map<Agent*, unsigned int> & get_last_round() const {
+        return this->last_round;
+    };
+
+    /** Convert the data in this object to a string. */
+    std::string serialize() const {
+        std::ostringstream oss;
+        for (auto& pair : last_round) {
+            Agent* agent = pair.first;
+            unsigned int bet = pair.second;
+            oss << agent->get_id() << " " << bet << " ";
+        }
+        return oss.str();
+    };
+
+private:
+    // agent |--> last bet
+    std::map<Agent*, unsigned int> & last_round;
+};
+
 
 /** The state. */
 class ChpState : public State {
@@ -49,6 +76,7 @@ public:
         for (auto& pair : player_bets) {
             std::vector<bool>& bets = pair.second;
             std::fill(bets.begin(), bets.end(), true);
+            bets[0] = false; // Zero is not a valid bet.
             Agent* agent = pair.first;
             InitialState initialState(agent->get_id(), this->bets);
             agent->initialize_episode(initialState);
@@ -57,10 +85,11 @@ public:
     };
 
     virtual Action send_to(Agent& agent) {
-        return agent.receive_state(*this);;    
+        AgentState agentState(this->last_round_bets);
+        return agent.receive_state(agentState);
     };
 
-    // /** Factory method. Constructs an action from string. */
+    // /** Factory method. Constructs a state from string. */
     // static ChpState deserialize(std::string const& state_msg);
 
     /** Returns a string representation of this instance. */
@@ -81,5 +110,7 @@ private:
 
     /** Used to break ties. This counter incremented at the start of every episode. This way there is not a single agent that has an advantage every episode. */
     unsigned int episode_count;
-};
 
+    /** The bets made by each player in the last round. */
+    std::map<Agent*, unsigned int> last_round_bets;
+};

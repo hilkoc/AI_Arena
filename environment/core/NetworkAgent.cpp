@@ -62,33 +62,22 @@ void NetworkAgent::initialize_episode(InitialState& initial_state) {
     };
 
 
-Action do_receive_state(NetworkAgent* this_agent, ChpState& chpState);
-
 /** React with an action to the observed state. */
-Action NetworkAgent::receive_state(State& state) {
+Action NetworkAgent::receive_state(AgentState& agentState) {
+    unsigned int const MAX_TIME_MILLIS(3000); // 3 sec.
     LOG(DEBUG) << "network agent receive_state";
-    // Have to cast state down to its known subtype, otherwise all possible subtypes of State
-    // will have to appear in the top level inerface of Agent.
-    ChpState& chpState = static_cast<ChpState&>(state);
-    return do_receive_state(this, chpState);
-};
+    // Convert the state to a string
+    std::string state_msg = agentState.serialize();
 
-// TODO make this a virtual member function
-/** Send the state to the subprocess, wait until the timeout for a response. */
-Action do_receive_state(NetworkAgent* this_agent, ChpState& chpState) {
-        unsigned int const MAX_TIME_MILLIS(3000); // 3 sec.
-        // Convert the state to a string
-        std::string state_msg = "state"; // TODO  chpState.serialize();
-
-        LOG(DEBUG) << "network agent sendString: " << state_msg;
-        // Send the state_string
-        this_agent->sendString(state_msg);
-        // Receive the action as string
-        std::string action_msg = this_agent->getString(MAX_TIME_MILLIS);
-        // Deserialize and return the action
-        LOG(INFO) << "network agent deserialize action; " << action_msg;
-        Action action = Action::deserialize(*this_agent, action_msg);
-        return action;
+    LOG(DEBUG) << "network agent sendString: " << state_msg;
+    // Send the state_string
+    this->sendString(state_msg);
+    // Receive the action as string
+    std::string action_msg = this->getString(MAX_TIME_MILLIS);
+    // Deserialize and return the action
+    LOG(INFO) << "network agent deserialize action; " << action_msg;
+    Action action = Action::deserialize(*this, action_msg);
+    return action;
 };
 
 

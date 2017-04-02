@@ -8,7 +8,7 @@
 #include "logging/log.h"
 
 class InitialState;
-//class Action;
+class AgentState;
 
 /** The Agent. */
 class Agent {
@@ -21,7 +21,7 @@ public:
     virtual void initialize_episode(InitialState& initial_state) = 0;
 
     /** React with an action to the observed state. */
-    virtual Action receive_state(State& state) = 0;
+    virtual Action receive_state(AgentState& state) = 0;
 
     /** Reward for action made by last call to receive_state. */
     virtual void receive_reward(Reward& reward){};

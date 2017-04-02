@@ -30,14 +30,7 @@ public:
         LOG(DEBUG) << "   linear agent " << this->get_id() << " episode initialized";
     };
 
-    virtual Action receive_state(State& state) {
-        // Have to cast state down to its known subtype, otherwise all possible subtypes of State
-        // will have to appear in the top level inerface of Agent.
-        ChpState& chpState = static_cast<ChpState&>(state);
-        return this->do_receive_state(chpState);
-    };
-
-    virtual Action do_receive_state(ChpState& chpState) {
+    virtual Action receive_state(AgentState& agentState) {
         Action action(*this, this->next_bet);
         next_bet = (next_bet - 1 + step + bets) % bets + 1;
         return action;

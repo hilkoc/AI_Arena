@@ -12,7 +12,15 @@ log.info("Starting")
 import sys
 
 def deserialize_round(round_string):
-    return round_string
+    """ param: round_string is expected to be list of integers separated by spaces.
+        The integers are interpreted as pairs (agent_id, bet). """
+    log.debug("round_string %s", round_string)
+    last_round = dict()
+    parts = round_string.strip().split(" ")
+    if len(parts) > 1:  # Before the first round we receive an empty string
+        for i in range(0, len(parts), 2):
+            last_round[int(parts[i])] = int(parts[i+1])
+    return last_round
 
 
 def send_string(toBeSent):
@@ -73,7 +81,7 @@ class Bot(object):
 
     def play_round(self, frame):
         last_round = get_frame(frame)
-        log.debug("last_round %s", last_round)
+        log.debug("last_round %s", str(last_round))
         bet = self.get_bet()
         log.debug("send_frame %s", str(bet))
         send_frame(str(bet))
@@ -85,6 +93,7 @@ def main():
         try:
             frame = get_string()
             if "RESET" == frame:
+                log.info("Reset")
                 bot.reset()
             else:
                 bot.play_round(frame)

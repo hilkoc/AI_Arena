@@ -13,9 +13,12 @@ std::map<Agent*, Reward> ChpState::update(std::vector<Action>& actions) {
     unsigned int max_bet(0);
     std::vector<Agent*> winners;
     unsigned int wins(0);
+    //  Store all the bets made this round, to later report these back to the players.
+    std::map<Agent*, unsigned int> round_bets;
     for (Action action : actions) {
         Agent& agent = action.get_agent();
         unsigned int bet = action.get_bet();
+        round_bets[&agent] = bet;
         LOG(INFO) << "    Agent " << agent.get_id() << ": " << bet;
         LOG(DEBUG) <<  "valid move? " << (player_bets[&agent][bet]? " true " : "false") ;
         if (player_bets[&agent][bet]) {
@@ -38,6 +41,7 @@ std::map<Agent*, Reward> ChpState::update(std::vector<Action>& actions) {
         }
         rewards[&agent] = Reward(0);  // Default to 0.
     }
+    this->last_round_bets = round_bets;
     Agent* round_winner = nullptr;
     std::sort(winners.begin(), winners.end(), [] (Agent* x, Agent* y) {
          return x->get_id() < y->get_id();} ); // Sort the agents by id.

@@ -9,7 +9,7 @@
 #include "logging/log.h"
 
 class InitialState;
-
+class AgentState;
 
 /** The NetworkAgent manages a sub process. */
 class NetworkAgent : public virtual Agent {
@@ -22,7 +22,7 @@ public:
     virtual void initialize_episode(InitialState& initial_state);
 
     /** React with an action to the observed state. */
-    virtual Action receive_state(State& state);
+    virtual Action receive_state(AgentState& state);
 
     /** Reward for action made by last call to receive_state. */
     virtual void receive_reward(Reward& reward){};
