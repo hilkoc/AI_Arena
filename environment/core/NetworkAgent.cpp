@@ -46,16 +46,26 @@ std::string to_string(int n) {
     return oss.str();
 };
 
+std::string to_string(std::vector<unsigned int> v) {
+    std::ostringstream oss;
+    for (auto n : v) {
+        oss << n << " ";
+    }
+    return oss.str();
+};
+
 /** Message the subprocess to reset for a new episode and send the initial state. */
 void NetworkAgent::initialize_episode(InitialState& initial_state) {
         unsigned int const MAX_INIT_TIME_MILLIS(10000); // 10 sec
-        std::string reset, player_id, bets;
+        std::string reset, player_id, bets, player_ids;
         reset = "RESET";
         sendString(reset);
         player_id = to_string(this->get_id());
         bets = to_string(initial_state.bets);
+        player_ids = to_string(initial_state.player_ids);
         sendString(player_id);
         sendString(bets);
+        sendString(player_ids);
         LOG(INFO) << "Network Agent eps init sending id " << player_id << " and bets " << bets << ".";
         std::string const botname = this->getString(MAX_INIT_TIME_MILLIS);
         LOG(INFO) << "Network Agent bot name: " << botname;
@@ -225,9 +235,7 @@ void NetworkAgent::sendString(std::string& msg) {
 
 #else
     //UniConnection connection = this->connection;
-    LOG(DEBUG) << "network agent 1 ssize_t charsWritten = write(connection.write,... ";
     ssize_t charsWritten = write(connection.write, msg.c_str(), msg.length());
-    LOG(DEBUG) << "network agent 2 ssize_t charsWritten = write(connection.write,... ";
     if(charsWritten < msg.length()) {
         LOG(ERROR) << "Problem writing to pipe";
         throw 1;

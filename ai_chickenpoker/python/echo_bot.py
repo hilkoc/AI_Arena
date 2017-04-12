@@ -1,7 +1,7 @@
-""" Chicken Poker random bot. """
+""" Chicken Poker echo bot. """
 
 import logging
-logging.basicConfig(filename='chp_bot.log', level=logging.DEBUG, filemode='w')
+logging.basicConfig(filename='echo_bot.log', level=logging.WARN, filemode='w', format='%(levelname)s %(message)s')
 log = logging.getLogger(__name__)
 log.info("Starting")
 
@@ -63,36 +63,49 @@ class Bot(object):
         self.id = None
         self.max_bet = None
         self.player_ids = None
-        self.bets = None
+        self.bets = dict()  # Keep track of available bets that players can make.
 
     def reset(self):
         """ Starts a new episode """
         self.id, self.max_bet, self.player_ids = get_init()
         log.info("myID %s, max_bet %s, pids %s", str(self.id), str(self.max_bet), str(self.player_ids))
 
-        self.bets = list(range(1, 1 + self.max_bet))
-        random.shuffle(self.bets)
+        self.bets.clear()
+        for pid in self.player_ids:
+            self.bets[pid] = list(range(1, 1 + self.max_bet))
+        random.shuffle(self.bets[self.id])
 
         log.info("send_init(%s)", self.name)
         send_init(self.name)
 
 
-    def get_bet(self):
+    def get_bet(self, last_round):
         """ Calculate the next bet to play """
-        log.debug("Mybets are %s", str(self.bets))
-        return self.bets.pop()
+        log.debug("Mybets are %s", str(self.bets[self.id]))
+        mybet = None
+        for pid, b in last_round.items():
+            log.debug("for id %d , removing (%d)", pid, b)
+            self.bets[pid].remove(b)
+            if (not pid == self.id) and (mybet is None):
+                mybet = b
 
+        log.debug("mybet %s, mybets %s, if %s", mybet, self.bets[self.id], (not mybet in self.bets[self.id]))
+        if not mybet in self.bets[self.id]:
+            log.debug("playing random (%s)", mybet)
+            mybet = self.bets[self.id][0]  # Simply play the first
+
+        return mybet
 
     def play_round(self, frame):
         last_round = get_frame(frame)
         log.debug("last_round %s", str(last_round))
-        bet = self.get_bet()
+        bet = self.get_bet(last_round)
         log.debug("send_frame %s", str(bet))
         send_frame(str(bet))
 
 
 def main():
-    bot = Bot("MyBot")
+    bot = Bot("EchoBot")
     while True:
         try:
             frame = get_string()

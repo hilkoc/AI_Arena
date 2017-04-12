@@ -14,12 +14,12 @@ class Agent;
 /** The information that an agent receives at the start of an episode. */
 class InitialState {
 public:
-    InitialState(unsigned int const player_id_in, unsigned int const bets_in)
-    : player_id(player_id_in), bets(bets_in) {};
+    InitialState(unsigned int const player_id_in, unsigned int const bets_in, std::vector<unsigned int>& player_ids_in)
+    : player_id(player_id_in), bets(bets_in), player_ids(player_ids_in) {};
     // The player id for breaking ties.
     unsigned int const player_id;
     unsigned int const bets;
-    // TODO  add total number of players
+    std::vector<unsigned int>& player_ids;  //all agent ids
 };
 
 
@@ -71,14 +71,19 @@ public:
 
 
     virtual void reset(){
-        rounds = bets;
         episode_count += 1;
+        rounds = bets;
+        last_round_bets.clear();
+        std::vector<unsigned int> player_ids;
+        for (auto& pair : player_bets) {
+            player_ids.push_back(pair.first->get_id());
+        }
         for (auto& pair : player_bets) {
             std::vector<bool>& bets = pair.second;
             std::fill(bets.begin(), bets.end(), true);
             bets[0] = false; // Zero is not a valid bet.
             Agent* agent = pair.first;
-            InitialState initialState(agent->get_id(), this->bets);
+            InitialState initialState(agent->get_id(), this->bets, player_ids);
             agent->initialize_episode(initialState);
         }
         // TODO reconnect dropped agents.
