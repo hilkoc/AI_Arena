@@ -32,17 +32,17 @@ CmdParams parse_cmdline_args(int argc, char ** argv) {
 
     TCLAP::CmdLine cmd("Chicken Poker Game Environment", ' ', "0.1");
 
-    TCLAP::SwitchArg overrideSwitch("o", "override", "Overrides player-sent names using cmd args [SERVER ONLY].", cmd, false);
-    TCLAP::SwitchArg timeoutSwitch("t", "timeout", "Ignore timeouts. Gives all bots unlimited time).", cmd, false);
+    // TCLAP::SwitchArg overrideSwitch("o", "override", "Overrides player-sent names using cmd args [SERVER ONLY].", cmd, false);
+    TCLAP::SwitchArg timeoutSwitch("t", "timeout", "Ignore timeouts. Gives all bots unlimited time.", cmd, false);
     TCLAP::SwitchArg debugSwitch("d", "debug", "Show all output, including debug.", cmd, false);
-    TCLAP::SwitchArg verboseSwitch("v", "verbose", "Show all output for each round.", cmd, false);
-    TCLAP::SwitchArg quietSwitch("q", "quiet", "Don't show intermidate game output.", cmd, false);
+    TCLAP::SwitchArg verboseSwitch("v", "verbose", "Show output for each round.", cmd, false);
+    TCLAP::SwitchArg quietSwitch("q", "quiet", "Don't show intermediate game output.", cmd, false);
 
-    TCLAP::ValueArg<unsigned int> setsArg("s", "sets", "A set consists of p games where p is the number of players. Run g = s*p number of games.", false, 0, "number", cmd);
-    TCLAP::ValueArg<unsigned int> gamesArg("g", "games", "Run g number of games. Player ids are rotated after every game.", false, 1, "number", cmd);
     TCLAP::ValueArg<unsigned int> betsArg("n", "bets", "The number of rounds in the game. This is also the value of the highest bet.", true, 10, "number", cmd);
-    //rm TCLAP::ValueArg<std::string> replayDirectoryArg("i", "replaydirectory", "The path to directory for replay output.", false, ".", "path to directory", cmd);
-    TCLAP::UnlabeledMultiArg<std::string> runcmdArgs("runCommands", "Run commands for bots.", false, "cmds in double quotes", cmd);
+    TCLAP::ValueArg<unsigned int> setsArg("s", "sets", "A set consists of p games where p is the number of players. Run g = s*p number of games.", false, 0, "number");
+    TCLAP::ValueArg<unsigned int> gamesArg("g", "games", "Run g number of games. Player ids are rotated after every game.", false, 1, "number");
+    cmd.xorAdd(gamesArg, setsArg);
+    TCLAP::UnlabeledMultiArg<std::string> runcmdArgs("runCommands", "Start commands for bots.", false, "cmds in double quotes", cmd);
 
     cmd.parse(argc, argv);
 
@@ -54,7 +54,7 @@ CmdParams parse_cmdline_args(int argc, char ** argv) {
     cmdParams.verbose = verboseSwitch.getValue();
     cmdParams.quiet = quietSwitch.getValue();
     cmdParams.ignore_timeout = timeoutSwitch.getValue();
-    cmdParams.override_names = overrideSwitch.getValue();
+    // cmdParams.override_names = overrideSwitch.getValue();
     cmdParams.run_commands = runcmdArgs.getValue();
 
     unsigned int numberOfPlayers = cmdParams.run_commands.size();

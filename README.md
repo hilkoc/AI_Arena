@@ -1,28 +1,24 @@
-# Chicken Poker
+# Open AI Arena
 
-Chicken poker is game that can be played with any number of players.
+The purpose of this project is to research Artificial Intelligence and Reinforcement Learning.
 
-## Rules of the game
+In the AI Arena, multiple agents can interact with a single environment. After sending its action, each each agent will receive a reward. This allows agents to learn, improve their policy and to adapt to each other.
 
-At the start of the game, each player is dealt n cards with the values 1 to n and is assigned a player id.
-Each round every player selects one card from its remaining cards to play.
-The player that shows the highest card wins that round
-and adds the values of all the cards in that round to its total score.
+This setting raises interesting questions.
 
-### Ties
-If two or more players show the same card and this happens to be the highest card in that round,
-the tie is broken as follows. The value of the highest card is v and this card is shown
-by k players. In ascending order of player id, the k players are numbered 0 to k.
-The player whos number is equal to the remainder of v divided by k, wins the round.
+* How do multiple agents interact and adapt to each other?
+Will they compete or cooperate?
+* How will they deal with a Nash-equilibrium? Do they get stuck in a prisoners dillema or can Artificial Intelligence with enough exploration learn to escape the dillema?
 
-## How to play
 
-The game environment is called chickp and has the following options and arguments.
+## The Arena
 
-chickp [-q] [-sets s] [-games g] -n n player1_cmd ...
--n n  The number of cards each player is dealt. This is also the value of the highest card.
--q    don't show intermidate game output
-The options g and s are mutually exclusive
--games g Run g number of games. Player ids are rotated after every game.
--sets  s A set consists p games where p is the number of players. Run g = s*p number of games.
+Competition drives progress. That's why the arena is not only for 'bots' to compete with each other. Anyone is free to derive from this code to develop a multi player game and setup an AI programming competition.
 
+The Arena is is C++，but is very flexible. Agents can be implemented in any programming language. They interact with the environment via stdout.
+
+An [example game](./environment/chickenpoker/README.md) is provided within the code.
+
+### Credits
+
+This project is inspired by the [Halite](https://halite.io/index.php) which was a particularly fun AI programming challenge. Indeed some of the code in the NetworkAgent.cpp is derived from [that project](https://github.com/HaliteChallenge/Halite).
