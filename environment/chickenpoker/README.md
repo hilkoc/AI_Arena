@@ -1,4 +1,4 @@
-# Chicken Poker
+# Chicken Pokers
 
 Chicken poker is game that can be played with any number of players. The objective for the players is to find out and adapt to each others strategy. To that end, typically multiple games are played before declaring the final winner.
 
@@ -23,13 +23,16 @@ After each game, player ids are rotated, such that the inital order of the playe
 
 An example of running the game environment could look like this:
 
-```bash
-./chickp -n 10 -s 50   "random" "python3 ../ai_chickenpoker/python/chp_bot.py" ```
+```
+./chickp -n 10 -s 50   "random" "python3 ../ai_chickenpoker/python/chp_bot.py"
+```
+
 This will play a session of games with two players. The first is the built-in random bot,
 the second is an external bot invoked with the given python command.
 This will start 50 sets, which for two players means a 100 games. Each game consists of n rounds.
 
 The -s 50 option is equivalent to -g 100. Using the -s option is a convenient way to ensure that each player has an equal number of games in each position to avoid a (dis)advantage in the long term.
+
 
 The game environment is called chickp and has the following options and arguments.
 
