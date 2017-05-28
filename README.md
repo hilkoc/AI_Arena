@@ -13,11 +13,16 @@ Will they compete or cooperate?
 
 ## The Arena
 
-Competition drives progress. That's why the arena is not only for 'bots' to compete with each other. Anyone is free to derive from this code to develop a multi player game and setup an AI programming competition.
+Competition drives progress. That's why the arena is not only for 'bots' to compete with each other. Anyone is free to derive from this code to develop a multi player game and setup an AI programming competition. So developers and AI researchers can compete with each other.
 
-The Arena is is C++，but is very flexible. Agents can be implemented in any programming language. They interact with the environment via stdout.
+The Arena is implemented in C++， but is very flexible. Agents can be implemented in any programming language. They interact with the environment via stdout.
+An import feature of the environment is that after each action, your agent or 'bot' will receive a reward. This way you your bot can learn and improve as it plays, just like in a classical reinforcement learning setup.
+Furthermore, instead of playing one episode or 'game' at a time. The environment lets bots play any number of consecutive games. Each bot can remember its state and what it has learned, to allow it to improve game after game.
 
-An [example game](./environment/chickenpoker/README.md) is provided within the code.
+This adds a new aspect to the challenge. Instead of simply playing the game and seeing who is best in a single game. The meta-challenge is to see which bot is the fastest learning and fasted to adapt to its opponents.
+
+See if you can defeat the random bot in the [example game](./environment/chickenpoker/README.md) that is already implemented. Or better, derive from the code to create your own multi player AI challenge.
+
 
 ### Credits
 
