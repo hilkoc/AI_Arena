@@ -1,4 +1,4 @@
-# Chicken Pokers
+# Chicken Poker
 
 Chicken poker is game that can be played with any number of players. The objective for the players is to find out and adapt to each others strategy. To that end, typically multiple games are played before declaring the final winner.
 
@@ -13,9 +13,9 @@ and adds the values of all the cards in that round to its total score.
 
 ### Ties
 If two or more players show the same card and this happens to be the highest card in that round,
-the tie is broken as follows. The value of the highest card is v and this card is shown
-by k players. In ascending order of player id, the k players are numbered 0 to k.
-The player whos number is equal to the remainder of v divided by k, wins the round.
+the tie is broken as follows. Let's say he value of the highest card is *v* and this card is shown
+by *k* players. In ascending order of player id, the *k* players are numbered 0 to *k-1*.
+The player whose number is equal to the remainder of *v* divided by *k*, wins the round.
 
 After each game, player ids are rotated, such that the inital order of the players does not cause statistical advantage or disadvantage.
 
@@ -29,7 +29,7 @@ An example of running the game environment could look like this:
 
 This will play a session of games with two players. The first is the built-in random bot,
 the second is an external bot invoked with the given python command.
-This will start 50 sets, which for two players means a 100 games. Each game consists of n rounds.
+This will start 50 sets, which for two players means a 100 games. Each game consists of n=10 rounds.
 
 The -s 50 option is equivalent to -g 100. Using the -s option is a convenient way to ensure that each player has an equal number of games in each position to avoid a (dis)advantage in the long term.
 
@@ -85,3 +85,9 @@ Where:
 
    Chicken Poker Game Environment
 ```
+
+## FAQ
+
+**Why is the game called Chicken Poker?**
+
+  Just for fun, you can't take everything in life too seriously.
