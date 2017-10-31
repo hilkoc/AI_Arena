@@ -149,7 +149,7 @@ int run_main(CmdParams& cmdParams) {
               << cmdParams.bets << " rounds.";
     Environment environment(chpFactory);
     environment.connect_agents(agents);
-    environment.run_episodes(cmdParams.games);
+    environment.run_session(cmdParams.games);
 
     return 0;
 }

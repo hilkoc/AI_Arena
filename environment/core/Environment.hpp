@@ -29,7 +29,7 @@ public:
 
     /** Assumes all Agents are connected. Runs one session of given nr of episodes.
     For each episode run iterations with connected agents and evolves the game state until the termination condition is met. */
-    virtual void run_episodes(unsigned int nr =1) {
+    virtual void run_session(unsigned int nr =1) {
         Stats session_stats;
         for (unsigned int episode_nr = 1; episode_nr <= nr; ++episode_nr) {
             LOG(INFO) << "Starting episode " << episode_nr;
